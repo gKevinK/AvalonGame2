@@ -4,20 +4,79 @@ const Status = {
     Play: 2,
 };
 
-socket = io();
+const Role = {
+    0: '梅林',
+    1: '派西维尔',
+    2: '忠臣',
+    3: '刺客',
+    4: '莫甘娜',
+    5: '莫德雷德',
+    6: '奥伯伦',
+    7: '爪牙'
+};
 
-socket.on('connection', function (data) {
-    // TODO
+var Info = {
+    role: '',
+    role_name: 'unknown',
+    player_id: '',
+    player_num: '',
+    known_player: [],
+
+    current_status: Status.Idle,
+    current_round: 0,
+    current_try: 0,
+    current_team: [],
+    mission_player_num: []
+}
+
+var MsgVM = new Vue({
+    el: '#msg-form',
+    data: {
+        message: '',
+    },
+    methods: {
+        send: function () {
+            socket.emit('msg', this.message);
+            this.message = '';
+        },
+    }
 });
 
-socket.on('login', function (data) {
-    // TODO
-});
+var GameVM = new Vue({
+    el: '#info-panel',
+    data: {
 
-socket.on('operate', function (data) {
-    // TODO
-});
+    },
+    methods: {
+        vote: function () {
 
-socket.on('msg', function (data) {
-    // TODO
-});
+        },
+
+    }
+})
+
+function dialogNotify(content) {
+    alert(content);
+};
+
+document.onload = function () {
+
+};
+
+// socket = io();
+
+// socket.on('connection', function (data) {
+//     // TODO
+// });
+
+// socket.on('login', function (data) {
+//     // TODO
+// });
+
+// socket.on('operate', function (data) {
+//     // TODO
+// });
+
+// socket.on('msg', function (data) {
+//     // TODO
+// });
