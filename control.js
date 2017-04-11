@@ -9,31 +9,33 @@ class User {
 
 class RoomCtrl {
 
-    constructor (player_num) {
+    constructor(room_id, player_num) {
+        this.room_id = room_id;
         this.player_num = player_num;
         this.players = [];
         this.players.length = player_num;
         this.id_to_order = [];
         this.core = new AvalonCore(player_num);
+        console.log('Room ' + room_id + 'established, player num: ' + player_num);
     }
 
-    add_user (user, order = null) {
-
-    }
-
-    msg (user_id, json) {
+    join(socket, user_id, order = null) {
 
     }
 
-    operate (user_id, json) {
+    message(user_id, json) {
 
     }
 
-    _get_order (user_id) {
+    operate(user_id, json) {
 
     }
 
-    remove_user (user_id) {
+    _get_order(user_id) {
+
+    }
+
+    exit(user_id) {
 
     }
 }

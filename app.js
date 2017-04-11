@@ -39,24 +39,37 @@ io.on('connection', function (socket) {
 
     socket.on('join', function (data) {
         var datajson = JSON.parse(data);
-        // TODO
-        if (/* Autheticate failed */false) {
-            socket.emit('error', JSON.stringify({
-                msg: 'Join failed',
-            }));
+        var result = -1;
+        if (datajson.user_id) {
+            // TODO
+        } else if (rooms.has(datajson.room_id)) {
+            var result = rooms[room_id].join(datajson.order);
+        } else {
+            room_id = new_room_id();
+            rooms.set(room_id, new RoomCtrl(room_id, datajson.player_num));
+            var result = rooms[room_id].join(datajson.order);
+        }
+        if (result >= 0) {
+            socket.room_id = room_id;
+            socket.order = order;
+            socket.emit('join', JSON.stringify({
+                room_id: room_id, order: result + 1,
+            }))
+        } else {
+            socket.emit('error', 'Join failed.');
         }
     });
 
     socket.on('operate', function (data) {
-        // TODO
+        rooms.get(socket.room_id).operate(socket.user_id, data);
     });
 
     socket.on('msg', function (data) {
-        // TODO
+        rooms.get(socket.room_id).message(socket.user_id, data);
     });
 
     socket.on('disconnect', function () {
-        // TODO
+        rooms.get(socket.room_id).exit(socket.user_id);
     });
 });
 

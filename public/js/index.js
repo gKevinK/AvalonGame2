@@ -29,6 +29,26 @@ var Info = {
     mission_player_num: []
 }
 
+Vue.component('player', {
+    template: '\
+        <li>\
+            {{ nickname }}\
+        <button @click="something">X</button>\
+        </li>\
+    ',
+    props: ['title']
+})
+
+var StateVM = new Vue({
+    el: 'body',
+    data: {
+        status: 0,
+    },
+    methods: {
+
+    }
+})
+
 var MsgVM = new Vue({
     el: '#msg-form',
     data: {
@@ -45,13 +65,22 @@ var MsgVM = new Vue({
 var GameVM = new Vue({
     el: '#info-panel',
     data: {
-
+        status: 'wait',
+        selection: [],
     },
     methods: {
-        vote: function () {
+        make_team: function () {
 
         },
+        team_vote: function () {
 
+        },
+        task_vote: function () {
+
+        },
+        assassin: function () {
+
+        }
     }
 })
 
@@ -63,14 +92,15 @@ document.onload = function () {
 
 };
 
-// socket = io();
+// var socket = io();
 
 // socket.on('connection', function (data) {
 //     // TODO
 // });
 
-// socket.on('login', function (data) {
+// socket.on('join', function (data) {
 //     // TODO
+//     alert(data);
 // });
 
 // socket.on('operate', function (data) {
