@@ -8,9 +8,8 @@ const io = socketio(server);
 app.use('/static', express.static('public'));
 
 const rooms = new Map();
-const users = new Map();
 
-function new_player_id () {
+function new_user_id () {
     var id = '';
     while (id.length < 100) {
         id += Math.random().toString(36).substr(2);
@@ -39,24 +38,22 @@ io.on('connection', function (socket) {
 
     socket.on('join', function (data) {
         var datajson = JSON.parse(data);
-        var result = -1;
-        if (datajson.user_id) {
-            // TODO
-        } else if (rooms.has(datajson.room_id)) {
-            var result = rooms[room_id].join(datajson.order);
-        } else {
+        var room_id = datajson.room_id || 0;
+        var user_id = new_user_id();
+        if (!rooms.has(room_id)) {
             room_id = new_room_id();
             rooms.set(room_id, new RoomCtrl(room_id, datajson.player_num));
-            var result = rooms[room_id].join(datajson.order);
         }
-        if (result >= 0) {
+        var order = rooms[room_id].join(socket, datajson.order);
+        if (order >= 0) {
+            socket.user_id = new_user_id();
             socket.room_id = room_id;
-            socket.order = order;
             socket.emit('join', JSON.stringify({
-                room_id: room_id, order: result + 1,
-            }))
+                room_id: room_id, order: order + 1,
+            }));
         } else {
             socket.emit('error', 'Join failed.');
+            socket.disconnect();
         }
     });
 
