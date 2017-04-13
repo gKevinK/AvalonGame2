@@ -66,7 +66,10 @@ io.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function () {
-        rooms.get(socket.room_id).exit(socket.user_id);
+        var should_del = rooms.get(socket.room_id).exit(socket.user_id);
+        if (should_del) {
+            rooms.delete(socket.room_id);
+        }
     });
 });
 

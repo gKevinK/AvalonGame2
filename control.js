@@ -1,9 +1,10 @@
-const AvalonCore = require('./avalon-core').AvalonCore;
+const AvalonCore = require('./avalon-core');
 
 class User {
     constructor (socket, name) {
         this.socket = socket;
         this.name = name;
+        this.status = 0;
     }
 
     message(json) {
@@ -19,7 +20,7 @@ class RoomCtrl {
         this.users = [];
         this.users.length = player_num;
         this.id_to_order = new Map();
-        this.core = new AvalonCore(player_num);
+        this.core = new AvalonCore(player_num, (args) => { this.notify(args); });
         console.log('Room ' + room_id + 'established, player num: ' + player_num);
     }
 
@@ -46,10 +47,17 @@ class RoomCtrl {
 
     }
 
-    exit(user_id) {
+    notify(notify_args) {
+        for (var i in notify_args.players) {
+            // TODO: Notify
+        }
+    }
 
+    exit(user_id) {
+        // TODO
+        return false;
     }
 }
 
-exports.RoomCtrl = RoomCtrl;
-exports.User = User;
+module.exports = RoomCtrl;
+module.exports.User = User;

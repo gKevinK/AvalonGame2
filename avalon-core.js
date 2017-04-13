@@ -18,8 +18,9 @@ const config = {
 }
 
 class AvalonCore {
-    constructor (player_num) {
+    constructor (player_num, notify_callback) {
         this.player_num = player_num;
+        this.notify = notify_callback;
     }
 
     init () {
@@ -35,4 +36,4 @@ class AvalonCore {
     }
 }
 
-exports.AvalonCore = AvalonCore;
+module.exports = AvalonCore;
