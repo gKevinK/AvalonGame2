@@ -39,6 +39,8 @@ Vue.component('player', {
     props: ['title']
 })
 
+var socket;
+
 var StateVM = new Vue({
     el: 'body',
     data: {
@@ -92,21 +94,24 @@ document.onload = function () {
 
 };
 
-// var socket = io();
+function try_join(room_id, order) {
+    socket = io();
+    socket.emit('join', JSON.stringify({
+        room_id: room_id, order: order,
+    }));
 
-// socket.on('connection', function (data) {
-//     // TODO
-// });
+    socket.on('join', function (data) {
+        // TODO
+        alert(data);
+    });
 
-// socket.on('join', function (data) {
-//     // TODO
-//     alert(data);
-// });
+    socket.on('operate', function (data) {
+        // TODO
+        alert(data);
+    });
 
-// socket.on('operate', function (data) {
-//     // TODO
-// });
-
-// socket.on('msg', function (data) {
-//     // TODO
-// });
+    socket.on('msg', function (data) {
+        // TODO
+        alert(data);
+    });
+}
