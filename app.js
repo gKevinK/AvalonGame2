@@ -8,6 +8,7 @@ const io = socketio(server);
 app.use('/static', express.static('public'));
 
 const rooms = new Map();
+const users = new Map();
 
 function new_user_id () {
     var id = '';
@@ -42,7 +43,7 @@ io.on('connection', function (socket) {
         var user_id = new_user_id();
         if (!rooms.has(room_id)) {
             room_id = new_room_id();
-            rooms.set(room_id, new RoomCtrl(room_id, datajson.player_num));
+            rooms.set(room_id, new RoomCtrl(room_id, parseInt(datajson.player_num)));
         }
         var order = rooms[room_id].join(socket, datajson.order);
         if (order >= 0) {

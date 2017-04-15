@@ -26,7 +26,16 @@ var Info = {
     current_round: 0,
     current_try: 0,
     current_team: [],
+    vote: [],
     mission_player_num: []
+}
+
+function OrderToName(order) {
+    return name;
+}
+
+function RoleIdToName(id) {
+    return Role[id];
 }
 
 Vue.component('player', {
@@ -36,8 +45,13 @@ Vue.component('player', {
         <button @click="something">X</button>\
         </li>\
     ',
-    props: ['title']
-})
+    props: ['nickname']
+});
+
+Vue.component('message', {
+    template: '<div>{{ msg.order }}: {{ msg.text }}</div>',
+    props: ['msg'],
+});
 
 var socket;
 
@@ -48,6 +62,33 @@ var StateVM = new Vue({
     },
     methods: {
 
+    }
+})
+
+var JoinVM = new Vue({
+    el: '#join-panel',
+    data: {
+        new_room: true,
+        player_num: 5,
+        room_id: '',
+        order: 1,
+        random_order: true,
+    },
+    methods: {
+        join: function () {
+            var join_json;
+            if (this.new_room) {
+                join_json = JSON.stringify({
+                    player_num: this.player_num,
+                });
+            } else {
+                join_json = JSON.stringify({
+                    room_id: this.room_id,
+                    order: this.random_order ? 0 : this.order,
+                });
+            }
+            try_join(join_json);
+        }
     }
 })
 
@@ -94,11 +135,9 @@ document.onload = function () {
 
 };
 
-function try_join(room_id, order) {
+function try_join(join_json) {
     socket = io();
-    socket.emit('join', JSON.stringify({
-        room_id: room_id, order: order,
-    }));
+    socket.emit('join', join_json);
 
     socket.on('join', function (data) {
         // TODO
