@@ -1,6 +1,6 @@
 const express = require('express');
 const socketio = require('socket.io');
-const control = require('./control');
+const RoomCtrl = require('./control');
 
 const app = express();
 const server = require('http').Server(app);
@@ -10,70 +10,87 @@ app.use('/static', express.static('public'));
 const rooms = new Map();
 const users = new Map();
 
-function new_user_id () {
-    var id = '';
+function new_user_id() {
+  var id = '';
+  while (id.length < 100) {
+    id += Math.random().toString(36).substr(2);
+  }
+  while (users.has(id)) {
     while (id.length < 100) {
-        id += Math.random().toString(36).substr(2);
+      id += Math.random().toString(36).substr(2);
     }
-    while (users.has(id)) {
-        while (id.length < 100) {
-            id += Math.random().toString(36).substr(2);
-        }
-    }
-    return id;
+  }
+  return id;
 }
 
-function new_room_id () {
-    var id = Math.floor(Math.random() * 9000 + 1000);
-    while (rooms.has(id)) {
-        id = Math.floor(Math.random() * 9000 + 1000);
-    }
-    return id;
+function new_room_id() {
+  var id = Math.floor(Math.random() * 9000 + 1000);
+  while (rooms.has(id)) {
+    id = Math.floor(Math.random() * 9000 + 1000);
+  }
+  return id.toString();
 }
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/views/index.html');
+  res.sendFile(__dirname + '/views/index.html');
 });
 
 io.on('connection', function (socket) {
 
-    socket.on('join', function (data) {
-        var datajson = JSON.parse(data);
-        var room_id = datajson.room_id || 0;
-        var user_id = new_user_id();
-        if (!rooms.has(room_id)) {
-            room_id = new_room_id();
-            rooms.set(room_id, new RoomCtrl(room_id, parseInt(datajson.player_num)));
-        }
-        var order = rooms[room_id].join(socket, datajson.order);
-        if (order >= 0) {
-            socket.user_id = new_user_id();
-            socket.room_id = room_id;
-            socket.emit('join', JSON.stringify({
-                room_id: room_id, order: order + 1,
-            }));
-        } else {
-            socket.emit('error', 'Join failed.');
-            socket.disconnect();
-        }
-    });
+  socket.on('join', function (data) {
+    var dataObj = JSON.parse(data);
+    var room_id = dataObj.room_id || 0;
+    var user_id = new_user_id();
+    if (dataObj.user_id) {
+      if (users.has(dataObj.user_id)) {
+        let room_id = users.get(dataObj.user_id);
+        let order = rooms.get(room_id).join(socket, user_id);
+      } else {
+        socket.emit('error', 'clear cache!');
+      }
+      return;
+    }
+    if (room_id == 0) {
+      room_id = new_room_id();
+      // if (!Number.isInteger(dataObj.player_num)) {
+      //   socket.emit('error');
+      // }
+      rooms.set(room_id, new RoomCtrl(room_id, dataObj.player_num));
+    }
+    //
+    if (!rooms.has(room_id)) {
+      socket.emit('error', '该房间不存在。');
+      socket.disconnect();
+    }
+    var order = rooms[room_id].join(socket, user_id, dataObj.order);
+    if (order >= 0) {
+      socket.user_id = new_user_id();
+      socket.room_id = room_id;
+      socket.emit('join', JSON.stringify({
+        room_id: room_id, order: order + 1,
+      }));
+    } else {
+      socket.emit('error', 'Join failed.');
+      socket.disconnect();
+    }
+  });
 
-    socket.on('operate', function (data) {
-        rooms.get(socket.room_id).operate(socket.user_id, data);
-    });
+  socket.on('operate', function (data) {
+    rooms.get(socket.room_id).operate(socket.user_id, data);
+  });
 
-    socket.on('msg', function (data) {
-        rooms.get(socket.room_id).message(socket.user_id, data);
-    });
+  socket.on('msg', function (data) {
+    rooms.get(socket.room_id).message(socket.user_id, data);
+  });
 
-    socket.on('disconnect', function () {
-        var should_del = rooms.get(socket.room_id).exit(socket.user_id);
-        if (should_del) {
-            rooms.delete(socket.room_id);
-        }
-    });
+  socket.on('disconnect', function () {
+    var should_del = rooms.get(socket.room_id).exit(socket.user_id);
+    if (should_del) {
+      rooms.delete(socket.room_id);
+    }
+  });
 });
 
 app.listen(3000, function () {
-    console.log('Listening on port 3000...');
+  console.log('Listening on port 3000...');
 });

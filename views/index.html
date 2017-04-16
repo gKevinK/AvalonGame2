@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
   <meta charset="UTF-8">
@@ -12,8 +12,26 @@
 <body>
   <h1>Hello world.</h1>
 
+  <div id="join-panel">
+    <input type="text" v-model="name">
+    <input type="text" v-model="room_id">
+    <select v-model="player_num">
+      <option>5</option>
+      <option>6</option>
+      <option>7</option>
+      <option>8</option>
+      <option>9</option>
+      <option>10</option>
+    </select>
+    <input type="checkbox" v-model="random_order">
+    <input type="number" v-model.number="order">
+    <button @click="join_new">创建房间</button>
+    <button @click="join">加入</button>
+  </div>
 
-  <div id="msg-panel"></div>
+  <div id="msg-panel">
+    <message v-for="msg in messages" ></message>
+  </div>
 
   <form id="msg-form" @submit.prevent="send">
     <input type="text"v-model="message" >
