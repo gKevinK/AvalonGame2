@@ -48,7 +48,7 @@ function role_id2name(id) {
 // });
 
 Vue.component('message', {
-  template: '<p>{{ msg.order }} - {{ msg.order | order2name }}: {{ msg.text }}</p>',
+  template: '<p>{{ msg.order }} - {{* msg.order | order2name }}: {{ msg.text }}</p>',
   props: ['msg'],
   filters: {
     order2name: order2name,
