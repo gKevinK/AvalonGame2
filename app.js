@@ -1,9 +1,10 @@
 const express = require('express');
 const socketio = require('socket.io');
 const RoomCtrl = require('./control');
+const User = RoomCtrl.User;
 
 const app = express();
-const server = require('http').Server(app);
+const server = require('http').createServer(app);
 const io = socketio(server);
 app.use('/static', express.static('public'));
 
@@ -51,19 +52,20 @@ io.on('connection', function (socket) {
       rooms.set(room_id, room);
     }
     if (!rooms.has(room_id)) {
-      socket.emit('error', '该房间不存在。');
+      socket.emit('err', '该房间不存在。');
       socket.disconnect();
     }
-    var res = rooms[room_id].join(socket, name, user_id, dataObj.order);
-    if (res instanceof string) {
-      socket.emit('error', res);
+    var res = rooms.get(room_id).join(socket, name, user_id, dataObj.order);
+    if (typeof(res) === 'string') {
+      socket.emit('err', res);
       socket.disconnect();
       if (room_id != dataObj.room_id) {
         rooms.delete(room_id);
+        console.log('Room ' + room_id + ' destroyed.');
       }
     } else {
       socket.user_id = user_id;
-      this.users.set(user_id, new User(socket, user_id, this.room_id, name));
+      users.set(user_id, new User(socket, user_id, room_id, name));
       socket.emit('join', JSON.stringify({
         user_id: user_id, room_id: room_id,
       }));
@@ -73,35 +75,44 @@ io.on('connection', function (socket) {
   socket.on('reconn', function (data) {
     var dataObj = JSON.parse(data);
     if (users.has(dataObj.user_id)) {
-      let room_id = users.get(dataObj.user_id).room_id;
+      var room_id = users.get(dataObj.user_id).room_id;
       rooms.get(room_id).reconnect(socket, user_id);
     } else {
-      socket.emit('error', 'clear cache!');
+      socket.emit('err', 'clear cache!');
       socket.disconnect();
     }
   });
 
   socket.on('operate', function (data) {
-    var room_id = users.get(socket.user_id).room_id;
-    rooms.get(room_id).operate(socket.user_id, data);
+    try {
+      var room_id = users.get(socket.user_id).room_id;
+      rooms.get(room_id).operate(socket.user_id, data);
+    } catch (e) {
+      console.log(e);
+    }
   });
 
   socket.on('msg', function (data) {
-    var room_id = users.get(socket.user_id).room_id;
-    rooms.get(room_id).message(socket.user_id, data);
+    try {
+      var room_id = users.get(socket.user_id).room_id;
+      rooms.get(room_id).message(socket.user_id, data);
+    } catch (e) {
+      console.log(e);
+    }
   });
 
   socket.on('disconnect', function () {
-    var room_id = users.get(socket.user_id).room_id;
-    if (room_id && rooms.has(room_id)) {
-      var should_del = rooms.get(room_id).exit(socket.user_id);
+    var user = users.get(socket.user_id);
+    if (user && user.room_id && rooms.has(user.room_id)) {
+      var should_del = rooms.get(user.room_id).exit(socket.user_id);
       if (should_del) {
         rooms.delete(socket.room_id);
+        console.log('Room ' + user.room_id + ' destroyed.');
       }
     }
   });
 });
 
-app.listen(3000, function () {
+server.listen(3000, function () {
   console.log('Listening on port 3000...');
 });

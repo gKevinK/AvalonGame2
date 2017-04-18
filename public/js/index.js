@@ -74,6 +74,7 @@ var StateVM = new Vue({
 var JoinVM = new Vue({
   el: '#join-panel',
   data: {
+    name: '',
     player_num: 5,
     room_id: '',
     order: 1,
@@ -82,11 +83,14 @@ var JoinVM = new Vue({
   methods: {
     join_new: function () {
       try_join(JSON.stringify({
+        name: this.name,
         player_num: this.player_num,
+        order: this.random_order ? 0 : this.order,
       }));
     },
     join: function () {
       try_join(JSON.stringify({
+        name: this.name,
         room_id: this.room_id,
         order: this.random_order ? 0 : this.order,
       }));
@@ -135,13 +139,17 @@ function dialogNotify(content) {
 
 document.onload = function () {
   if (localStorage.getItem('user_id')) {
-    try_join(JSON.stringify({ user_id: localStorage.getItem('user_id')}));
+    try_join(JSON.stringify({ user_id: localStorage.getItem('user_id')}), true);
   }
 };
 
-function try_join(join_json) {
+function try_join(join_json, reconnect) {
   socket = io();
-  socket.emit('join', join_json);
+  if (reconnect) {
+    socket.emit('reconn', join_json);
+  } else {
+    socket.emit('join', join_json);
+  }
 
   socket.on('join', function (data) {
     // TODO

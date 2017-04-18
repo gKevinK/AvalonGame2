@@ -17,9 +17,9 @@ class User {
     this.history_msg.push(json);
   }
 
-  sysmessage(json) {
+  nofity(json) {
     if (this.socket) {
-      this.socket.emit('sysmsg', json);
+      this.socket.emit('notify', json);
     }
   }
 }
@@ -47,17 +47,17 @@ class RoomCtrl {
     this.ids = [];
     this.ids.length = player_num;
     this.core = new AvalonCore(player_num, (args) => { this.notify(args); });
-    console.log('Room ' + room_id + 'created, player num: ' + player_num + '.');
+    console.log('Room ' + room_id + ' created, player num: ' + player_num + '.');
   }
 
-  join(socket, name, user_id, order = null) {
+  join(socket, name = '', user_id, order = null) {
     if (!Number.isInteger(order) || order < 0 || order > this.player_num || name.length < 4) {
       return '请求错误。';
     } else if (order === 0) {
       var try_order = random_range(this.player_num);
-      for (var o in try_order) {
-        if (this.ids[o] == undefined && this.users.get(this.ids[o]).status != 0) {
-          if (this.users.get(this.ids[o]).status != 0) {
+      for (var o of try_order) {
+        if (this.ids[o] == undefined || this.users.get(this.ids[o]).status != 0) {
+          if (this.users.get(this.ids[o]) && this.users.get(this.ids[o]).status != 0) {
             this.users.delete(this.ids[o]);
           }
           this.ids[o] = user_id;
@@ -84,13 +84,13 @@ class RoomCtrl {
     user.status = 0;
     user.socket = socket;
     socket.emit('join', JSON.stringify({
-      room_id: this.room_id, order: order, user_id: user_id
+      room_id: this.room_id, user_id: user_id,
     }));
   }
 
   message(user_id, text) {
-    var order = this.id_to_order.get(user_id);
-    for (var user in this.users) {
+    var order = this.ids.indexOf(user_id);
+    for (var user in this.ids) {
       if (user) {
         user.message(JSON.stringify({
           player_order: order + 1, text: text,
@@ -100,6 +100,7 @@ class RoomCtrl {
   }
 
   operate(user_id, json) {
+    var op = JSON.parse(json);
 
   }
 
@@ -114,8 +115,16 @@ class RoomCtrl {
   }
 
   exit(user_id) {
-    // TODO
-    return false;
+    this.users.get(user_id).status = -1;
+    for (var id of this.ids) {
+      if (this.users.get(id) && this.users.get(id).status == 0) {
+        return false;
+      }
+    }
+    for (var id of this.ids) {
+      this.users.delete(id);
+    }
+    return true;
   }
 }
 
