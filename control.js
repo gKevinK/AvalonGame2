@@ -1,13 +1,39 @@
 const AvalonCore = require('./avalon-core');
 
 class User {
-  constructor(socket, user_id, room_id, name) {
-    this.socket = socket;
+  constructor(user_id, room_id, order, name) {
     this.user_id = user_id;
     this.room_id = room_id;
+    this.order = order
     this.name = name;
-    this.status = 0;
+  }
+}
+
+class Seat {
+
+  constructor() {
     this.history_msg = [];
+  }
+
+  get status() {
+    // TODO
+    return this.socket != undefined;
+  }
+
+  canOccupy(user_id) {
+    if (this.socket) {
+      return false;
+    }
+  }
+
+  occupy(socket, user_id, clearUserCallback) {
+    this.socket = socket;
+    this.user_id = user_id;
+  }
+
+  release() {
+    this.socket = undefined;
+    // this.user_id = undefined;
   }
 
   message(json) {
@@ -44,8 +70,10 @@ class RoomCtrl {
     this.room_id = room_id;
     this.player_num = player_num;
     this.users = users;
-    this.ids = [];
-    this.ids.length = player_num;
+    this.seats = [];
+    for (var i = 0; i < player_num; i++) {
+      this.seats.push(new Seat());
+    }
     this.core = new AvalonCore(player_num, (args) => { this.notify(args); });
     console.log('Room ' + room_id + ' created, player num: ' + player_num + '.');
   }
@@ -56,26 +84,20 @@ class RoomCtrl {
     } else if (order === 0) {
       var try_order = random_range(this.player_num);
       for (var o of try_order) {
-        if (this.ids[o] == undefined || this.users.get(this.ids[o]).status != 0) {
-          if (this.users.get(this.ids[o]) && this.users.get(this.ids[o]).status != 0) {
-            this.users.delete(this.ids[o]);
-          }
-          this.ids[o] = user_id;
+        if (this.seats[o].canOccupy(user_id)) {
+          this.seats[o].occupy(socket, user_id);
           return o;
         }
       }
       return '房间已满。';
     } else {
       var o = order - 1;
-      if (this.ids[o] && this.users.get(this.ids[o])) {
-        if (this.users.get(this.ids[o]).status != 0) {
-          this.users.delete(this.ids[o]);
-        } else {
-          return '此位置已被占用。';
-        }
+      if (this.seats[o].canOccupy(user_id)) {
+        this.seats[o].occupy(socket, user_id);
+        return o;
+      } else {
+        return '此位置已被占用。';
       }
-      this.ids[o] = user_id;
-      return o;
     }
   }
 
@@ -90,9 +112,9 @@ class RoomCtrl {
 
   message(user_id, text) {
     var order = this.ids.indexOf(user_id);
-    for (var user in this.ids) {
-      if (user) {
-        user.message(JSON.stringify({
+    for (var seat in this.seats) {
+      if (seat) {
+        seat.message(JSON.stringify({
           player_order: order + 1, text: text,
         }));
       }
@@ -110,19 +132,20 @@ class RoomCtrl {
 
   notify(notify_args) {
     for (var i in notify_args.players) {
-      // TODO: Notify
+      this.seats[i].nofity(notify_args.msg);
     }
   }
 
   exit(user_id) {
     this.users.get(user_id).status = -1;
-    for (var id of this.ids) {
-      if (this.users.get(id) && this.users.get(id).status == 0) {
+    console.log('Room ' + this.room_id + ', user ' + name + ' exit.');
+    for (var seat of this.seats) {
+      if (seat.status == 0) {
         return false;
       }
     }
-    for (var id of this.ids) {
-      this.users.delete(id);
+    for (var seat of this.seats) {
+      seat.release();
     }
     return true;
   }

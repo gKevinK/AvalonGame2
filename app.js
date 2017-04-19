@@ -65,9 +65,9 @@ io.on('connection', function (socket) {
       }
     } else {
       socket.user_id = user_id;
-      users.set(user_id, new User(socket, user_id, room_id, name));
+      users.set(user_id, new User(user_id, room_id, res, name));
       socket.emit('join', JSON.stringify({
-        user_id: user_id, room_id: room_id,
+        user_id: user_id, room_id: room_id, order: res + 1,
       }));
     }
   });
@@ -85,8 +85,8 @@ io.on('connection', function (socket) {
 
   socket.on('operate', function (data) {
     try {
-      var room_id = users.get(socket.user_id).room_id;
-      rooms.get(room_id).operate(socket.user_id, data);
+      var user = users.get(socket.user_id);
+      rooms.get(user.room_id).operate(user.user_id, data);
     } catch (e) {
       console.log(e);
     }
@@ -94,8 +94,8 @@ io.on('connection', function (socket) {
 
   socket.on('msg', function (data) {
     try {
-      var room_id = users.get(socket.user_id).room_id;
-      rooms.get(room_id).message(socket.user_id, data);
+      var user = users.get(socket.user_id);
+      rooms.get(user.room_id).operate(user.order, data);
     } catch (e) {
       console.log(e);
     }
