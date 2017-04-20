@@ -23,6 +23,8 @@ class Seat {
   canOccupy(user_id) {
     if (this.socket) {
       return false;
+    } else {
+      return true;
     }
   }
 
@@ -31,9 +33,13 @@ class Seat {
     this.user_id = user_id;
   }
 
+  leave() {
+    this.socket = undefined;
+  }
+
   release() {
     this.socket = undefined;
-    // this.user_id = undefined;
+    return this.user_id;
   }
 
   message(json) {
@@ -43,7 +49,7 @@ class Seat {
     this.history_msg.push(json);
   }
 
-  nofity(json) {
+  notify(json) {
     if (this.socket) {
       this.socket.emit('notify', json);
     }
@@ -82,23 +88,30 @@ class RoomCtrl {
     if (!Number.isInteger(order) || order < 0 || order > this.player_num || name.length < 4) {
       return '请求错误。';
     } else if (order === 0) {
+      order = -1;
       var try_order = random_range(this.player_num);
       for (var o of try_order) {
         if (this.seats[o].canOccupy(user_id)) {
-          this.seats[o].occupy(socket, user_id);
-          return o;
+          order = o;
+          break;
         }
       }
-      return '房间已满。';
+      if (order === -1) {
+        return '房间已满。';
+      }
     } else {
       var o = order - 1;
       if (this.seats[o].canOccupy(user_id)) {
-        this.seats[o].occupy(socket, user_id);
-        return o;
+        order = o;
       } else {
         return '此位置已被占用。';
       }
     }
+    for (var seat of this.seats) {
+      seat.notify(JSON.stringify({ event: 'join', order: o + 1, name: name }));
+    }
+    this.seats[order].occupy(socket, user_id);
+    return order;
   }
 
   reconnect(socket, user_id) {
@@ -123,7 +136,11 @@ class RoomCtrl {
 
   operate(user_id, json) {
     var op = JSON.parse(json);
+    var result = this.core.operate(0, op);
+    if (result === false) {
 
+    }
+    //
   }
 
   _get_user(user_id) {
@@ -136,8 +153,11 @@ class RoomCtrl {
     }
   }
 
-  exit(user_id) {
-    this.users.get(user_id).status = -1;
+  exit(order) {
+    this.seats[order].leave();
+    for (var seat in this.seats) {
+      seat.notify(JSON.stringify({ event: 'exit', order: order + 1 }));
+    }
     console.log('Room ' + this.room_id + ', user ' + name + ' exit.');
     for (var seat of this.seats) {
       if (seat.status == 0) {
@@ -145,7 +165,8 @@ class RoomCtrl {
       }
     }
     for (var seat of this.seats) {
-      seat.release();
+      var user_id = seat.release();
+      this.users.delete(user_id);
     }
     return true;
   }

@@ -144,6 +144,9 @@ document.onload = function () {
 };
 
 function try_join(join_json, reconnect) {
+  if (socket) {
+    socket.disconnect();
+  }
   socket = io();
   if (reconnect) {
     socket.emit('reconn', join_json);
@@ -167,5 +170,13 @@ function try_join(join_json, reconnect) {
   socket.on('msg', function (data) {
     // TODO
     alert(data);
+  });
+
+  socket.on('err', function (data) {
+    if (data == 'clear cache!') {
+      localStorage.clear();
+    } else {
+      alert(data);
+    }
   });
 }
