@@ -17,15 +17,11 @@ class Seat {
 
   get status() {
     // TODO
-    return this.socket != undefined;
+    return (this.socket != undefined) ? 0 : -1;
   }
 
   canOccupy(user_id) {
-    if (this.socket) {
-      return false;
-    } else {
-      return true;
-    }
+    return this.socket == undefined;
   }
 
   occupy(socket, user_id, clearUserCallback) {
@@ -111,6 +107,7 @@ class RoomCtrl {
       seat.notify(JSON.stringify({ event: 'join', order: o + 1, name: name }));
     }
     this.seats[order].occupy(socket, user_id);
+    console.log('Room ' + this.room_id + ', player ' + order + ' ' + name + ' joined.');
     return order;
   }
 
@@ -123,9 +120,8 @@ class RoomCtrl {
     }));
   }
 
-  message(user_id, text) {
-    var order = this.ids.indexOf(user_id);
-    for (var seat in this.seats) {
+  message(order, text) {
+    for (var seat of this.seats) {
       if (seat) {
         seat.message(JSON.stringify({
           player_order: order + 1, text: text,
@@ -134,7 +130,7 @@ class RoomCtrl {
     }
   }
 
-  operate(user_id, json) {
+  operate(order, json) {
     var op = JSON.parse(json);
     var result = this.core.operate(0, op);
     if (result === false) {
@@ -155,10 +151,10 @@ class RoomCtrl {
 
   exit(order) {
     this.seats[order].leave();
-    for (var seat in this.seats) {
+    for (var seat of this.seats) {
       seat.notify(JSON.stringify({ event: 'exit', order: order + 1 }));
     }
-    console.log('Room ' + this.room_id + ', user ' + name + ' exit.');
+    console.log('Room ' + this.room_id + ', player ' + order + ' exit.');
     for (var seat of this.seats) {
       if (seat.status == 0) {
         return false;

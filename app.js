@@ -95,7 +95,7 @@ io.on('connection', function (socket) {
   socket.on('msg', function (data) {
     try {
       var user = users.get(socket.user_id);
-      rooms.get(user.room_id).operate(user.order, data);
+      rooms.get(user.room_id).message(user.order, data);
     } catch (e) {
       console.log(e);
     }
@@ -104,9 +104,9 @@ io.on('connection', function (socket) {
   socket.on('disconnect', function () {
     var user = users.get(socket.user_id);
     if (user && user.room_id && rooms.has(user.room_id)) {
-      var should_del = rooms.get(user.room_id).exit(socket.order);
+      var should_del = rooms.get(user.room_id).exit(user.order);
       if (should_del) {
-        rooms.delete(socket.room_id);
+        rooms.delete(user.room_id);
         console.log('Room ' + user.room_id + ' destroyed.');
       }
     }
