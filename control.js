@@ -1,4 +1,4 @@
-const AvalonCore = require('./avalon-core');
+const AvalonMachine = require('./avalon-core');
 
 class User {
   constructor(user_id, room_id, order, name) {
@@ -76,7 +76,7 @@ class RoomCtrl {
     for (var i = 0; i < player_num; i++) {
       this.seats.push(new Seat());
     }
-    this.core = new AvalonCore(player_num, (args) => { this.notify(args); });
+    this.machine = new AvalonMachine(player_num, (args) => { this.notify(args); });
     console.log('Room ' + room_id + ' created, player num: ' + player_num + '.');
   }
 
@@ -132,20 +132,16 @@ class RoomCtrl {
 
   operate(order, json) {
     var op = JSON.parse(json);
-    var result = this.core.operate(0, op);
+    var result = this.machine.operate(0, op);
     if (result === false) {
-
+      this.seats[order].notify('error');
     }
     //
   }
 
-  _get_user(user_id) {
-
-  }
-
   notify(notify_args) {
     for (var i in notify_args.players) {
-      this.seats[i].nofity(notify_args.msg);
+      this.seats[i].notify(notify_args.msg);
     }
   }
 

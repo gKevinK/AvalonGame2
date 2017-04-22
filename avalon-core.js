@@ -21,15 +21,44 @@ class AvalonCore {
   constructor(player_num, notify_callback) {
     this.player_num = player_num;
     this.notify = notify_callback;
+
+    this.current_round = 1;
+    this.round = config.mission[player_num];
+    // TODO
   }
 
   init() {
     // TODO
   }
 
-  operate() {
+  operate(order, obj) {
     // TODO
+  }
+
+  getStatus(order) {
+    // TODO
+    return {
+      current_round: this.current_round, round: this.round,
+    }
   }
 }
 
-module.exports = AvalonCore;
+class AvalonMachine {
+  constructor (player_num, notify_callback) {
+    this.core = new AvalonCore(player_num, notify_callback);
+  }
+
+  init() {
+    this.core.init();
+  }
+
+  operate(order, obj) {
+    this.core.operate(order, obj);
+  }
+
+  getStatus(order) {
+    this.core.getStatus(order);
+  }
+}
+
+module.exports = AvalonMachine;
