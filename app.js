@@ -13,11 +13,11 @@ const users = new Map();
 
 function new_user_id() {
   var id = '';
-  while (id.length < 100) {
+  while (id.length < 40) {
     id += Math.random().toString(36).substr(2);
   }
   while (users.has(id)) {
-    while (id.length < 100) {
+    while (id.length < 40) {
       id += Math.random().toString(36).substr(2);
     }
   }
@@ -48,7 +48,7 @@ io.on('connection', function (socket) {
       // if (!Number.isInteger(dataObj.player_num)) {
       //   socket.emit('error');
       // }
-      var room = new RoomCtrl(room_id, dataObj.player_num, users);
+      var room = new RoomCtrl(room_id, users, dataObj.player_num);
       rooms.set(room_id, room);
     }
     if (!rooms.has(room_id)) {

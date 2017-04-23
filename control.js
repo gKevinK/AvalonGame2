@@ -68,7 +68,7 @@ function random_range(n) {
 
 class RoomCtrl {
 
-  constructor(room_id, player_num, users) {
+  constructor(room_id, users, player_num) {
     this.room_id = room_id;
     this.player_num = player_num;
     this.users = users;
@@ -103,9 +103,9 @@ class RoomCtrl {
         return '此位置已被占用。';
       }
     }
-    for (var seat of this.seats) {
+    this.seats.map(function(seat) {
       seat.notify(JSON.stringify({ event: 'join', order: o + 1, name: name }));
-    }
+    });
     this.seats[order].occupy(socket, user_id);
     console.log('Room ' + this.room_id + ', player ' + order + ' ' + name + ' joined.');
     return order;
@@ -132,7 +132,7 @@ class RoomCtrl {
 
   operate(order, json) {
     var op = JSON.parse(json);
-    var result = this.machine.operate(0, op);
+    var result = this.machine.operate(order, op);
     if (result === false) {
       this.seats[order].notify('error');
     }

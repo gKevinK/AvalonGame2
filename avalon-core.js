@@ -17,11 +17,22 @@ const config = {
   },
 }
 
+function shuffleCopy(array) {
+  var randarr = [];
+  for (var i = 0; i < array.length; i++) {
+    randarr.push(Math.random());
+  }
+  return array.slice().sort(function (a, b) {
+    return randarr[a] - randarr[b];
+  });
+}
+
 class AvalonCore {
   constructor(player_num, notify_callback) {
     this.player_num = player_num;
     this.notify = notify_callback;
 
+    this.role = shuffleCopy(config.role[player_num]);
     this.current_round = 1;
     this.round = config.mission[player_num];
     // TODO
@@ -31,7 +42,19 @@ class AvalonCore {
     // TODO
   }
 
-  operate(order, obj) {
+  makeTeam(order, array) {
+    // TODO
+  }
+
+  teamVote(order, agree) {
+    // TODO
+  }
+
+  taskVote(order, success) {
+    // TODO
+  }
+
+  assassin(target) {
     // TODO
   }
 
@@ -53,7 +76,28 @@ class AvalonMachine {
   }
 
   operate(order, obj) {
-    this.core.operate(order, obj);
+    var result;
+    switch (obj.op) {
+      case 'make_team':
+        // TODO
+        result = this.core.makeTeam(order, obj.list);
+        break;
+      case 'team_vote':
+        // TODO
+        result = this.core.teamVote(order, obj.vote);
+        break;
+      case 'task_vote':
+        // TODO
+        result = this.core.taskVote(order, obj.vote);
+        break;
+      case 'assassin':
+        // TODO
+        result = this.core.assassin(obj.target);
+        break;
+      default:
+        return '错误的操作。';
+    }
+    return result;
   }
 
   getStatus(order) {
