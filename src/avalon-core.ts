@@ -1,3 +1,20 @@
+enum ROLE {
+  Merlin = 0,
+  Percival,
+  Loyalist,
+  Assassin,
+  Morgana,
+  Mordred,
+  Oberon,
+  Minion,
+  Lancelot,
+}
+
+enum STATUS {
+  Wait = 0,
+
+}
+
 const config = {
   role: {
     5: [0, 1, 2, 3, 4],
@@ -7,7 +24,7 @@ const config = {
     9: [0, 1, 2, 2, 2, 2, 3, 4, 5],
     10: [0, 1, 2, 2, 2, 2, 3, 4, 5, 6]
   },
-  mission: {
+  task_player_num: {
     5: [2, 3, 2, 3, 3],
     6: [2, 3, 4, 3, 4],
     7: [2, 3, 3, 4, 4],
@@ -27,52 +44,49 @@ function shuffleCopy(array) {
   });
 }
 
-class AvalonCore {
+class AvalonMachine {
+  player_num: Number;
+  notify: Function;
+  role: Array<Number>;
+  c_round: Number;
+  c_task: Number;
+  round: Array<Number>;
+
   constructor(player_num, notify_callback) {
     this.player_num = player_num;
     this.notify = notify_callback;
 
     this.role = shuffleCopy(config.role[player_num]);
-    this.current_round = 1;
-    this.round = config.mission[player_num];
+    this.c_round = 1;
+    this.round = config.task_player_num[player_num];
     // TODO
   }
 
-  init() {
+  private _init() {
     // TODO
   }
 
-  makeTeam(order, array) {
+  private _makeTeam(order, array) {
     // TODO
   }
 
-  teamVote(order, agree) {
+  private _teamVote(order, agree) {
     // TODO
   }
 
-  taskVote(order, success) {
+  private _taskVote(order, success) {
     // TODO
   }
 
-  assassin(target) {
+  private _assassin(target) {
     // TODO
   }
 
   getStatus(order) {
     // TODO
     return {
-      current_round: this.current_round, round: this.round,
+      current_round: this.c_round, round: this.round,
     }
-  }
-}
-
-class AvalonMachine {
-  constructor (player_num, notify_callback) {
-    this.core = new AvalonCore(player_num, notify_callback);
-  }
-
-  init() {
-    this.core.init();
   }
 
   operate(order, obj) {
@@ -80,28 +94,24 @@ class AvalonMachine {
     switch (obj.op) {
       case 'make_team':
         // TODO
-        result = this.core.makeTeam(order, obj.list);
+        result = this._makeTeam(order, obj.list);
         break;
       case 'team_vote':
         // TODO
-        result = this.core.teamVote(order, obj.vote);
+        result = this._teamVote(order, obj.vote);
         break;
       case 'task_vote':
         // TODO
-        result = this.core.taskVote(order, obj.vote);
+        result = this._taskVote(order, obj.vote);
         break;
       case 'assassin':
         // TODO
-        result = this.core.assassin(obj.target);
+        result = this._assassin(obj.target);
         break;
       default:
         return '错误的操作。';
     }
     return result;
-  }
-
-  getStatus(order) {
-    this.core.getStatus(order);
   }
 }
 

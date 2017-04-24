@@ -1,4 +1,4 @@
-const AvalonMachine = require('./avalon-core');
+const AvalonMachine = require('./src/avalon-core');
 
 class User {
   constructor(user_id, room_id, order, name) {
@@ -21,7 +21,7 @@ class Seat {
   }
 
   canOccupy(user_id) {
-    return this.socket == undefined;
+    return (this.socket == undefined);
   }
 
   occupy(socket, user_id, clearUserCallback) {
