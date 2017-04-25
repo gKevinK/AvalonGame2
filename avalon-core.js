@@ -1,17 +1,17 @@
-enum ROLE {
-  Merlin = 0,
-  Percival,
-  Loyalist,
-  Assassin,
-  Morgana,
-  Mordred,
-  Oberon,
-  Minion,
-  Lancelot,
+const ROLE = {
+  Merlin: 0,
+  Percival: 1,
+  Loyalist: 2,
+  Assassin: 3,
+  Morgana: 4,
+  Mordred: 5,
+  Oberon: 6,
+  Minion: 7,
+  Lancelot: 8,
 }
 
-enum STATUS {
-  Wait = 0,
+const STATUS = {
+  Wait: 0,
 
 }
 
@@ -45,12 +45,6 @@ function shuffleCopy(array) {
 }
 
 class AvalonMachine {
-  player_num: Number;
-  notify: Function;
-  role: Array<Number>;
-  c_round: Number;
-  c_task: Number;
-  round: Array<Number>;
 
   constructor(player_num, notify_callback) {
     this.player_num = player_num;
@@ -58,27 +52,30 @@ class AvalonMachine {
 
     this.role = shuffleCopy(config.role[player_num]);
     this.c_round = 1;
+    this.c_team = [];
+    this.c_teamvote = [];
+    this.c_taskvote = [];
     this.round = config.task_player_num[player_num];
     // TODO
   }
 
-  private _init() {
+  _init() {
     // TODO
   }
 
-  private _makeTeam(order, array) {
+  _makeTeam(order, array) {
     // TODO
   }
 
-  private _teamVote(order, agree) {
+  _teamVote(order, agree) {
     // TODO
   }
 
-  private _taskVote(order, success) {
+  _taskVote(order, success) {
     // TODO
   }
 
-  private _assassin(target) {
+  _assassin(target) {
     // TODO
   }
 

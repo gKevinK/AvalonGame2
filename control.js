@@ -1,4 +1,4 @@
-const AvalonMachine = require('./src/avalon-core');
+const AvalonMachine = require('./avalon-core');
 
 class User {
   constructor(user_id, room_id, order, name) {
