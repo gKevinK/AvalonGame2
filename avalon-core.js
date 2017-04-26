@@ -1,3 +1,5 @@
+const Util = require('./util.js');
+
 const ROLE = {
   Merlin: 0,
   Percival: 1,
@@ -12,7 +14,11 @@ const ROLE = {
 
 const STATUS = {
   Wait: 0,
-
+  MakeTeam: 1,
+  TeamVote: 2,
+  TaskVote: 3,
+  Assassin: 4,
+  End: 5,
 }
 
 const config = {
@@ -34,37 +40,45 @@ const config = {
   },
 }
 
-function shuffleCopy(array) {
-  var randarr = [];
-  for (var i = 0; i < array.length; i++) {
-    randarr.push(Math.random());
-  }
-  return array.slice().sort(function (a, b) {
-    return randarr[a] - randarr[b];
-  });
-}
-
 class AvalonMachine {
 
   constructor(player_num, notify_callback) {
-    this.player_num = player_num;
+    this.pnum = player_num;
     this.notify = notify_callback;
 
-    this.role = shuffleCopy(config.role[player_num]);
-    this.c_round = 1;
+    this.status = STATUS.Wait;
+    this.roles = shuffleCopy(config.role[player_num]);
+    this.c_round = 0;
+    this.c_try = 0;
+    this.c_capital = 0;
     this.c_team = [];
     this.c_teamvote = [];
     this.c_taskvote = [];
+    this.result = [ -1, -1, -1, -1, -1 ];
     this.round = config.task_player_num[player_num];
     // TODO
   }
 
   _init() {
     // TODO
+    this.status = STATUS.MakeTeam;
+    this.c_capital = Util.randomIn(this.pnum);
+    this.notify({ players: Util.range(this.pnum),
+      msg: { type: 'make_team', player: this.c_capital }});
   }
 
   _makeTeam(order, array) {
     // TODO
+    if (this.status != STATUS.MakeTeam || order != this.c_capital) {
+      return '错误的操作。';
+    }
+    this.c_try += 1;
+    this.c_team = array;
+    this.c_teamvote.fill(-1);
+    this.status = STATUS.TeamVote;
+    this.notify({ players: [], msg: {
+      type: 'team-vote', content: this.array,
+    }});
   }
 
   _teamVote(order, agree) {
@@ -73,6 +87,11 @@ class AvalonMachine {
 
   _taskVote(order, success) {
     // TODO
+
+    var failNum = 0;
+    if (failNum == 0 || (this.pnum >= 7 && failNum == 1)) {
+
+    }
   }
 
   _assassin(target) {

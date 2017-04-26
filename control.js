@@ -1,4 +1,5 @@
 const AvalonMachine = require('./avalon-core');
+const Util = require('./util.js');
 
 class User {
   constructor(user_id, room_id, order, name) {
@@ -31,10 +32,6 @@ class Seat {
 
   leave() {
     this.socket = undefined;
-  }
-
-  release() {
-    this.socket = undefined;
     return this.user_id;
   }
 
@@ -50,20 +47,6 @@ class Seat {
       this.socket.emit('notify', json);
     }
   }
-}
-
-function range(n) {
-  return [...Array(n).keys()];
-}
-
-function random_range(n) {
-  var randarr = [];
-  for (var i = 0; i < n; i++) {
-    randarr.push(Math.random());
-  }
-  return range(n).sort(function (a, b) {
-    return randarr[a] - randarr[b];
-  });
 }
 
 class RoomCtrl {
@@ -85,7 +68,7 @@ class RoomCtrl {
       return '请求错误。';
     } else if (order === 0) {
       order = -1;
-      var try_order = random_range(this.player_num);
+      var try_order = Util.randomRange(this.player_num);
       for (var o of try_order) {
         if (this.seats[o].canOccupy(user_id)) {
           order = o;
@@ -140,8 +123,12 @@ class RoomCtrl {
   }
 
   notify(notify_args) {
-    for (var i in notify_args.players) {
-      this.seats[i].notify(notify_args.msg);
+    if (notify_args.players.length == 0) {
+      this.seats.map(function (seat) { seat.notify(notify_args.msg); });
+    } else {
+      for (var i in notify_args.players) {
+        this.seats[i].notify(notify_args.msg);
+      }
     }
   }
 
@@ -157,7 +144,7 @@ class RoomCtrl {
       }
     }
     for (var seat of this.seats) {
-      var user_id = seat.release();
+      var user_id = seat.leave();
       this.users.delete(user_id);
     }
     return true;
