@@ -59,7 +59,7 @@ class RoomCtrl {
     for (var i = 0; i < player_num; i++) {
       this.seats.push(new Seat());
     }
-    this.machine = new AvalonMachine(player_num, (args) => { this.notify(args); });
+    this.machine = new AvalonMachine(player_num, (players, msg) => { this.notify(players, msg); });
     console.log('Room ' + room_id + ' created, player num: ' + player_num + '.');
   }
 
@@ -122,12 +122,12 @@ class RoomCtrl {
     //
   }
 
-  notify(notify_args) {
-    if (notify_args.players.length == 0) {
-      this.seats.map(function (seat) { seat.notify(notify_args.msg); });
+  notify(players, msg) {
+    if (players.length == 0) {
+      this.seats.map(function (seat) { seat.notify(JSON.stringify(msg)); });
     } else {
-      for (var i in notify_args.players) {
-        this.seats[i].notify(notify_args.msg);
+      for (var i in players) {
+        this.seats[i].notify(JSON.stringify(msg));
       }
     }
   }

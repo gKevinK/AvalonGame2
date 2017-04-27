@@ -63,8 +63,7 @@ class AvalonMachine {
     // TODO
     this.status = STATUS.MakeTeam;
     this.c_capital = Util.randomIn(this.pnum);
-    this.notify({ players: Util.range(this.pnum),
-      msg: { type: 'make_team', player: this.c_capital }});
+    this.notify([], { type: 'make_team', player: this.c_capital });
   }
 
   _makeTeam(order, array) {
@@ -76,32 +75,43 @@ class AvalonMachine {
     this.c_team = array;
     this.c_teamvote.fill(-1);
     this.status = STATUS.TeamVote;
-    this.notify({ players: [], msg: {
-      type: 'team-vote', content: this.array,
-    }});
+    this.notify([], { type: 'team-vote', content: this.array });
   }
 
   _teamVote(order, agree) {
     // TODO
+    this.notify([], { type: 'vote', content: order });
+
   }
 
   _taskVote(order, success) {
     // TODO
 
+    this.notify([], { type: 'vote', content: order });
     var failNum = 0;
-    if (failNum == 0 || (this.pnum >= 7 && failNum == 1)) {
+    if (failNum == 0 || (this.pnum >= 7 && this.round == 3 && failNum == 1)) {
 
     }
   }
 
   _assassin(target) {
     // TODO
+    if (this.roles[target] === ROLE.Merlin) {
+      this.notify([], { type: 'result', content: 0 });
+    } else {
+      this.notify([], { type: 'result', content: 1 });
+    }
+    this.status = STATUS.End;
+    this.notify([], { type: 'end', content: this.roles });
   }
 
   getStatus(order) {
     // TODO
     return {
-      current_round: this.c_round, round: this.round,
+      round: this.c_round,
+      capital: this.c_capital,
+      team: this.c_team,
+      teamvote: this.c_teamvote,
     }
   }
 
