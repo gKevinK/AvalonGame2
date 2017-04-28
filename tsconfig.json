@@ -1,9 +1,12 @@
 {
     "compilerOptions": {
+        "target": "es6",
         "module": "commonjs",
-        "sourceMap": true
+        "sourceMap": true,
+        "outDir": "dist",
+        "allowJs": true
     },
     "exclude": [
-        "*.ts"
+        "node_modules"
     ]
 }

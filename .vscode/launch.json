@@ -8,7 +8,9 @@
             "type": "node",
             "request": "launch",
             "name": "启动程序",
-            "program": "${workspaceRoot}\\app.js"
+            "program": "${workspaceRoot}\\app.js",
+            // "preLaunchTask": ".tsc",
+            "sourceMaps": true
         },
         {
             "type": "node",

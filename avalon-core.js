@@ -67,7 +67,6 @@ class AvalonMachine {
   }
 
   _makeTeam(order, array) {
-    // TODO
     if (this.status != STATUS.MakeTeam || order != this.c_capital) {
       return '错误的操作。';
     }
@@ -80,8 +79,16 @@ class AvalonMachine {
 
   _teamVote(order, agree) {
     // TODO
+    this.c_teamvote[order] = agree ? 1 : 0;
     this.notify([], { type: 'vote', content: order });
-
+    if (this.c_teamvote.findIndex(-1) == -1) {
+      this.notify([], { type: 'team-vote-res', content: this.c_teamvote });
+      if (this.c_teamvote.filter(x => x == 1).length > this.pnum / 2) {
+        this.status = STATUS.TaskVote;
+        this.c_taskvote.fill(-1);
+        this.notify([], {});
+      }
+    }
   }
 
   _taskVote(order, success) {
@@ -112,6 +119,7 @@ class AvalonMachine {
       capital: this.c_capital,
       team: this.c_team,
       teamvote: this.c_teamvote,
+      taskvote: this.c_taskvote.map((v) => v >= 0),
     }
   }
 
