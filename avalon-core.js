@@ -49,13 +49,15 @@ class AvalonMachine {
     this.status = STATUS.Wait;
     this.roles = shuffleCopy(config.role[player_num]);
     this.c_round = 0;
-    this.c_try = 0;
+    this.c_try = 1;
     this.c_capital = 0;
     this.c_team = [];
     this.c_teamvote = [];
+    this.c_teamvote.length = this.pnum;
     this.c_taskvote = [];
+    this.c_taskvote.length = this.pnum;
     this.result = [ -1, -1, -1, -1, -1 ];
-    this.round = config.task_player_num[player_num];
+    this.tpn = config.task_player_num[player_num];
     // TODO
   }
 
@@ -63,14 +65,13 @@ class AvalonMachine {
     // TODO
     this.status = STATUS.MakeTeam;
     this.c_capital = Util.randomIn(this.pnum);
-    this.notify([], { type: 'make_team', player: this.c_capital });
+    this.notify([], { type: 'make_team', player: this.c_capital, round: this.c_round, try: this.c_try });
   }
 
   _makeTeam(order, array) {
     if (this.status != STATUS.MakeTeam || order != this.c_capital) {
       return '错误的操作。';
     }
-    this.c_try += 1;
     this.c_team = array;
     this.c_teamvote.fill(-1);
     this.status = STATUS.TeamVote;
@@ -82,11 +83,19 @@ class AvalonMachine {
     this.c_teamvote[order] = agree ? 1 : 0;
     this.notify([], { type: 'vote', content: order });
     if (this.c_teamvote.findIndex(-1) == -1) {
-      this.notify([], { type: 'team-vote-res', content: this.c_teamvote });
-      if (this.c_teamvote.filter(x => x == 1).length > this.pnum / 2) {
+      this.notify([], { type: 'team-res', content: this.c_teamvote });
+      if (this.c_teamvote.filter(x => x == 1).length > Math.floor(this.pnum / 2)) {
         this.status = STATUS.TaskVote;
         this.c_taskvote.fill(-1);
-        this.notify([], {});
+        this.notify([], { type: 'task-vote' });
+      } else {
+        if (this.c_try == 5) {
+          this._taskEndWith(false);
+        } else {
+          this.c_try += 1;
+          this.status = STATUS.MakeTeam;
+          this.notify([], { type: 'make-team', player: this.c_capital, round: this.c_round, try: this.c_try });
+        }
       }
     }
   }
@@ -97,6 +106,14 @@ class AvalonMachine {
     this.notify([], { type: 'vote', content: order });
     var failNum = 0;
     if (failNum == 0 || (this.pnum >= 7 && this.round == 3 && failNum == 1)) {
+
+    }
+  }
+
+  _taskEndWith(success) {
+    if (success) {
+
+    } else {
 
     }
   }
@@ -118,8 +135,8 @@ class AvalonMachine {
       round: this.c_round,
       capital: this.c_capital,
       team: this.c_team,
-      teamvote: this.c_teamvote,
-      taskvote: this.c_taskvote.map((v) => v >= 0),
+      teamvote: this.c_teamvote.map(v => v >= 0),
+      taskvote: this.c_taskvote.map(v => v >= 0),
     }
   }
 
