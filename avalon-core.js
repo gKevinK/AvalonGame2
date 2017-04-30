@@ -102,31 +102,36 @@ class AvalonMachine {
 
   _taskVote(order, success) {
     // TODO
-
     this.notify([], { type: 'vote', content: order });
-    var failNum = 0;
+    var failNum = this.c_taskvote.filter(v => v == 1).length;
     if (failNum == 0 || (this.pnum >= 7 && this.round == 3 && failNum == 1)) {
-
+      this._taskEndWith(true);
+    } else {
+      this._taskEndWith(false);
     }
   }
 
   _taskEndWith(success) {
-    if (success) {
-
+    this.result[this.c_round] = success ? 1 : 0;
+    if (this.result.filter(v => v == 1).length == 3) {
+      this.status = STATUS.Assassin;
+      this.notify([], { type: 'assassin', });
+    } else if (this.result.filter(v => v == 0).length == 3) {
+      this.status = STATUS.End;
+      this.notify([], { type: 'end', result: 1, content: this.roles })
     } else {
-
+      this.c_round += 1;
+      this.c_try = 1;
+      this.status = STATUS.MakeTeam;
+      this.notify([], { type: 'make-team', player: this.c_capital, round: this.c_round, try: this.c_try });
     }
   }
 
   _assassin(target) {
     // TODO
-    if (this.roles[target] === ROLE.Merlin) {
-      this.notify([], { type: 'result', content: 0 });
-    } else {
-      this.notify([], { type: 'result', content: 1 });
-    }
+    var res = this.roles[target] == ROLE.Merlin ? 0 : 1;
     this.status = STATUS.End;
-    this.notify([], { type: 'end', content: this.roles });
+    this.notify([], { type: 'end', result: res, content: this.roles });
   }
 
   getStatus(order) {
