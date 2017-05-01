@@ -9,7 +9,7 @@ const ROLE = {
   Mordred: 5,
   Oberon: 6,
   Minion: 7,
-  Lancelot: 8,
+  // Lancelot: 8,S
 }
 
 const STATUS = {
@@ -63,6 +63,22 @@ class AvalonMachine {
 
   _init() {
     // TODO
+    this.roles.map((v, i) => {
+      var knowledge = [];
+      if (v == ROLE.Merlin) {
+        this.roles.map((v1, i1) => {
+          if ([ROLE.Minion, ROLE.Morgana, ROLE.Oberon, ROLE.Assassin].some(v2 => v1 == v2))
+            knowledge.push(i1);
+        });
+      } else if ([ROLE.Morgana, ROLE.Minion, ROLE.Assassin, ROLE.Mordred].some(v1 => v == v1)) {
+        this.roles.map((v1, i1) => {
+          if ([ROLE.Morgana, ROLE.Minion, ROLE.Assassin, ROLE.Mordred].some(v2 => v1 == v2))
+            knowledge.push(i1);
+        });
+      }
+      this.notify([i], { role: v, known: knowledge });
+    });
+
     this.status = STATUS.MakeTeam;
     this.c_capital = Util.randomIn(this.pnum);
     this.notify([], { type: 'make_team', player: this.c_capital, round: this.c_round, try: this.c_try });
