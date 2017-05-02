@@ -91,6 +91,9 @@ class RoomCtrl {
     });
     this.seats[order].occupy(socket, user_id);
     console.log('Room ' + this.room_id + ', player ' + order + ' ' + name + ' joined.');
+    if (this.seats.every(s => s.status == 0)) {
+      setTimeout(() => this.machine._start(), 1);
+    }
     return order;
   }
 

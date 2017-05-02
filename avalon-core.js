@@ -9,7 +9,7 @@ const ROLE = {
   Mordred: 5,
   Oberon: 6,
   Minion: 7,
-  // Lancelot: 8,S
+  // Lancelot: 8 / 9
 }
 
 const STATUS = {
@@ -61,8 +61,9 @@ class AvalonMachine {
     // TODO
   }
 
-  _init() {
+  _start() {
     // TODO
+    console.log(this.roles);
     this.roles.map((v, i) => {
       var knowledge = [];
       if (v == ROLE.Merlin) {
@@ -81,7 +82,8 @@ class AvalonMachine {
 
     this.status = STATUS.MakeTeam;
     this.c_capital = Util.randomIn(this.pnum);
-    this.notify([], { type: 'make_team', player: this.c_capital, round: this.c_round, try: this.c_try });
+    this.notify([], { type: 'make_team', player: this.c_capital,
+                      round: this.c_round, try: this.c_try });
   }
 
   _makeTeam(order, array) {
@@ -97,20 +99,21 @@ class AvalonMachine {
   _teamVote(order, agree) {
     // TODO
     this.c_teamvote[order] = agree ? 1 : 0;
-    this.notify([], { type: 'vote', content: order });
+    this.notify([], { type: 'team-vote-i', content: order });
     if (this.c_teamvote.findIndex(-1) == -1) {
       this.notify([], { type: 'team-res', content: this.c_teamvote });
       if (this.c_teamvote.filter(x => x == 1).length > Math.floor(this.pnum / 2)) {
         this.status = STATUS.TaskVote;
         this.c_taskvote.fill(-1);
-        this.notify([], { type: 'task-vote' });
+        this.notify([], { type: 'task-vote', team: this.c_team });
       } else {
         if (this.c_try == 5) {
           this._taskEndWith(false);
         } else {
           this.c_try += 1;
           this.status = STATUS.MakeTeam;
-          this.notify([], { type: 'make-team', player: this.c_capital, round: this.c_round, try: this.c_try });
+          this.notify([], { type: 'make-team', player: this.c_capital,
+                            round: this.c_round, try: this.c_try });
         }
       }
     }
@@ -118,7 +121,7 @@ class AvalonMachine {
 
   _taskVote(order, success) {
     // TODO
-    this.notify([], { type: 'vote', content: order });
+    this.notify([], { type: 'task-vote-i', content: order });
     var failNum = this.c_taskvote.filter(v => v == 1).length;
     if (failNum == 0 || (this.pnum >= 7 && this.round == 3 && failNum == 1)) {
       this._taskEndWith(true);
@@ -139,12 +142,12 @@ class AvalonMachine {
       this.c_round += 1;
       this.c_try = 1;
       this.status = STATUS.MakeTeam;
-      this.notify([], { type: 'make-team', player: this.c_capital, round: this.c_round, try: this.c_try });
+      this.notify([], { type: 'make-team', player: this.c_capital,
+                        round: this.c_round, try: this.c_try });
     }
   }
 
   _assassin(target) {
-    // TODO
     var res = this.roles[target] == ROLE.Merlin ? 0 : 1;
     this.status = STATUS.End;
     this.notify([], { type: 'end', result: res, content: this.roles });
@@ -154,6 +157,7 @@ class AvalonMachine {
     // TODO
     return {
       round: this.c_round,
+      try: this.c_try,
       capital: this.c_capital,
       team: this.c_team,
       teamvote: this.c_teamvote.map(v => v >= 0),
