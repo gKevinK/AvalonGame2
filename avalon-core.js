@@ -98,7 +98,7 @@ class AvalonMachine {
 
   _teamVote(order, agree) {
     // TODO
-    this.c_teamvote[order] = agree ? 1 : 0;
+    this.c_teamvote[order] = agree;
     this.notify([], { type: 'team-vote-i', content: order });
     if (this.c_teamvote.findIndex(-1) == -1) {
       this.notify([], { type: 'team-res', content: this.c_teamvote });
@@ -121,6 +121,7 @@ class AvalonMachine {
 
   _taskVote(order, success) {
     // TODO
+    this.c_taskvote[order] = success;
     this.notify([], { type: 'task-vote-i', content: order });
     var failNum = this.c_taskvote.filter(v => v == 1).length;
     if (failNum == 0 || (this.pnum >= 7 && this.round == 3 && failNum == 1)) {

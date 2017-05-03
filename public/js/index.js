@@ -1,10 +1,10 @@
-var Status = {
+var STATUS = {
   Idle: 0,
   Wait: 1,
   Play: 2,
 };
 
-var Role = {
+var ROLE = {
   0: '梅林',
   1: '派西维尔',
   2: '忠臣',
@@ -12,8 +12,18 @@ var Role = {
   4: '莫甘娜',
   5: '莫德雷德',
   6: '奥伯伦',
-  7: '爪牙'
+  7: '爪牙',
+  // 8 / 9: '兰斯洛特',
 };
+
+var tpn = {
+  5: [2, 3, 2, 3, 3],
+  6: [2, 3, 4, 3, 4],
+  7: [2, 3, 3, 4, 4],
+  8: [3, 4, 4, 5, 5],
+  9: [3, 4, 4, 5, 5],
+  10: [3, 4, 4, 5, 5]
+}
 
 var Info = {
   role: '',
@@ -21,7 +31,7 @@ var Info = {
   player_num: '',
   known_player: [],
 
-  current_status: Status.Idle,
+  current_status: STATUS.Idle,
   current_round: 0,
   current_try: 0,
   current_team: [],
@@ -34,7 +44,7 @@ function order2name(order) {
 }
 
 function role_id2name(id) {
-  return Role[id];
+  return ROLE[id];
 }
 
 // Vue.component('player', {
@@ -57,7 +67,7 @@ Vue.component('message', {
 
 var socket;
 var shared = {
-  status: 0,
+  status: STATUS.Idle,
   player_name: [],
 }
 
@@ -115,20 +125,22 @@ var GameVM = new Vue({
   el: '#info-panel',
   data: {
     status: 'wait',
-    selection: [],
+    selections: [],
+    vote: '',
+    target: '',
   },
   methods: {
     make_team: function () {
-
+      socket.emit('make-team', JSON.stringify({ list: this.selections }));
     },
     team_vote: function () {
-
+      socket.emit('team-vote', JSON.stringify({ vote: this.vote }));
     },
     task_vote: function () {
-
+      socket.emit('task-vote', JSON.stringify({ vote: this.vote }));
     },
     assassin: function () {
-
+      socket.emit('assassin', JSON.stringify({ target: this.target }));
     }
   }
 })
