@@ -49,7 +49,7 @@ class AvalonMachine {
     this.status = STATUS.Wait;
     this.roles = shuffleCopy(config.role[player_num]);
     this.c_round = 0;
-    this.c_try = 1;
+    this.c_try = 0;
     this.c_capital = 0;
     this.c_team = [];
     this.c_teamvote = [];
@@ -107,7 +107,7 @@ class AvalonMachine {
         this.c_taskvote.fill(-1);
         this.notify([], { type: 'task-vote', team: this.c_team });
       } else {
-        if (this.c_try == 5) {
+        if (this.c_try == 4) {
           this._taskEndWith(false);
         } else {
           this.c_try += 1;

@@ -1,10 +1,19 @@
-var STATUS = {
+const STATUS = {
   Idle: 0,
   Wait: 1,
   Play: 2,
 };
 
-var ROLE = {
+const GSTATUS = {
+  Wait: 0,
+  MakeTeam: 1,
+  TeamVote: 2,
+  TaskVote: 3,
+  Assassin: 4,
+  End: 5,
+};
+
+const ROLE = {
   0: '梅林',
   1: '派西维尔',
   2: '忠臣',
@@ -16,7 +25,7 @@ var ROLE = {
   // 8 / 9: '兰斯洛特',
 };
 
-var tpn = {
+const tpn = {
   5: [2, 3, 2, 3, 3],
   6: [2, 3, 4, 3, 4],
   7: [2, 3, 3, 4, 4],
@@ -31,12 +40,11 @@ var Info = {
   player_num: '',
   known_player: [],
 
-  current_status: STATUS.Idle,
-  current_round: 0,
-  current_try: 0,
-  current_team: [],
+  c_status: GSTATUS.Wait,
+  c_round: 0,
+  c_try: 0,
+  c_team: [],
   vote: [],
-  mission_player_num: []
 }
 
 function order2name(order) {
@@ -112,35 +120,61 @@ var MsgVM = new Vue({
   el: '#msg-form',
   data: {
     message: '',
+    messages: [],
   },
   methods: {
     send: function () {
       socket.emit('msg', this.message);
       this.message = '';
     },
+    onMsg: function () {
+
+    }
   }
 });
 
 var GameVM = new Vue({
-  el: '#info-panel',
+  el: '#game-panel',
   data: {
-    status: 'wait',
+    status: STATUS.Idle,
+    team: [],
     selections: [],
     vote: '',
     target: '',
   },
   methods: {
-    make_team: function () {
+    makeTeam: function () {
       socket.emit('make-team', JSON.stringify({ list: this.selections }));
     },
-    team_vote: function () {
-      socket.emit('team-vote', JSON.stringify({ vote: this.vote }));
+    teamVote: function () {
+      socket.emit('team-vote', JSON.stringify({ vote: parseInt(this.vote) }));
     },
-    task_vote: function () {
-      socket.emit('task-vote', JSON.stringify({ vote: this.vote }));
+    taskVote: function () {
+      socket.emit('task-vote', JSON.stringify({ vote: parseInt(this.vote) }));
     },
     assassin: function () {
       socket.emit('assassin', JSON.stringify({ target: this.target }));
+    },
+    onNotify: function (msg) {
+      var obj = JSON.parse(msg);
+      switch (obj.type) {
+        case 'make-team':
+          break;
+        case 'team-vote':
+          break;
+        case 'team-res':
+          break;
+        case 'team-vote-i':
+          break;
+        case 'task-vote':
+          break;
+        case 'task-vote-i':
+          break;
+        case 'assassin':
+          break;
+        case 'end':
+          break;
+      }
     }
   }
 })
@@ -170,23 +204,24 @@ function try_join(join_json, reconnect) {
     // TODO
     var dataObj = JSON.parse(data);
     alert(data);
-    shared.status = 1;
+    shared.status = STATUS.Wait;
     localStorage.setItem('user_id', dataObj.user_id);
   });
 
   socket.on('nofity', function (data) {
     // TODO
-    alert(data);
+    GameVM.onNotify(data);
   });
 
   socket.on('msg', function (data) {
     // TODO
-    alert(data);
+    MsgVM.onMsg(data);
   });
 
   socket.on('err', function (data) {
     if (data == 'clear cache!') {
       localStorage.clear();
+      status = STATUS.Idle;
     } else {
       alert(data);
     }
