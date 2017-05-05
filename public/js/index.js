@@ -136,7 +136,7 @@ var MsgVM = new Vue({
 var GameVM = new Vue({
   el: '#game-panel',
   data: {
-    status: STATUS.Idle,
+    status: GSTATUS.Wait,
     team: [],
     selections: [],
     vote: '',
@@ -159,20 +159,30 @@ var GameVM = new Vue({
       var obj = JSON.parse(msg);
       switch (obj.type) {
         case 'make-team':
+          this.status = GSTATUS.MakeTeam;
           break;
         case 'team-vote':
+          this.status = GSTATUS.TeamVote;
+          this.team = obj.content;
           break;
         case 'team-res':
+          // TODO
           break;
         case 'team-vote-i':
+          // TODO
           break;
         case 'task-vote':
+          this.status = GSTATUS.TaskVote;
           break;
         case 'task-vote-i':
+          // TODO
           break;
         case 'assassin':
+          this.status = GSTATUS.Assassin;
           break;
         case 'end':
+          this.status = GSTATUS.End;
+          dialogNotify((obj.result == 1 ? "好人获胜\n" : "坏人获胜\n") + obj.content); // TODO
           break;
       }
     }
@@ -185,7 +195,7 @@ function dialogNotify(content) {
 
 document.onload = function () {
   if (localStorage.getItem('user_id')) {
-    try_join(JSON.stringify({ user_id: localStorage.getItem('user_id')}), true);
+    try_join(JSON.stringify({ user_id: localStorage.getItem('user_id') }), true);
   }
 };
 
