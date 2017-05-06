@@ -61,7 +61,7 @@ class AvalonMachine {
     // TODO
   }
 
-  _start() {
+  start() {
     // TODO
     console.log(this.roles);
     this.roles.map((v, i) => {

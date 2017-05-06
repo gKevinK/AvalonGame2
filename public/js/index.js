@@ -34,19 +34,6 @@ const tpn = {
   10: [3, 4, 4, 5, 5]
 }
 
-var Info = {
-  role: '',
-  player_id: '',
-  player_num: '',
-  known_player: [],
-
-  c_status: GSTATUS.Wait,
-  c_round: 0,
-  c_try: 0,
-  c_team: [],
-  vote: [],
-}
-
 function order2name(order) {
   return 'name';
 }
@@ -76,7 +63,11 @@ Vue.component('message', {
 var socket;
 var shared = {
   status: STATUS.Idle,
+  room_id: '',
   player_name: [],
+  player_stat: [],
+  player_num: 5,
+  order: 1,
 }
 
 var StateVM = new Vue({
@@ -93,9 +84,9 @@ var JoinVM = new Vue({
   el: '#join-panel',
   data: {
     name: '',
-    player_num: 5,
-    room_id: '',
-    order: 1,
+    player_num: shared.player_num,
+    room_id: shared.room_id,
+    order: shared.order,
     random_order: true,
   },
   methods: {
@@ -137,8 +128,17 @@ var GameVM = new Vue({
   el: '#game-panel',
   data: {
     status: GSTATUS.Wait,
+    player_num: shared.player_num,
+    player_name: shared.player_name,
+    player_stat: shared.player_stat,
+    round: 0,
+    try: 0,
+    result: [ -1, -1, -1, -1, -1 ],
+    role: 0,
+    knowledge: [],
     team: [],
     selections: [],
+    vote_i: [],
     vote: '',
     target: '',
   },
@@ -158,6 +158,13 @@ var GameVM = new Vue({
     onNotify: function (msg) {
       var obj = JSON.parse(msg);
       switch (obj.type) {
+        case 'join-i':
+          this.player_name[obj.order] = obj.name;
+          this.player_stat[obj.order] = 1;
+          break;
+        case 'exit':
+          this.player_stat[obj.order] = 0;
+          break;
         case 'make-team':
           this.status = GSTATUS.MakeTeam;
           break;
@@ -167,6 +174,8 @@ var GameVM = new Vue({
           break;
         case 'team-res':
           // TODO
+          this.teamVote
+          dialogNotify(obj.content);
           break;
         case 'team-vote-i':
           // TODO
@@ -212,10 +221,12 @@ function try_join(join_json, reconnect) {
 
   socket.on('join', function (data) {
     // TODO
-    var dataObj = JSON.parse(data);
+    var obj = JSON.parse(data);
     alert(data);
     shared.status = STATUS.Wait;
-    localStorage.setItem('user_id', dataObj.user_id);
+    shared.room_id = obj.room_id;
+    shared.order = obj.order;
+    localStorage.setItem('user_id', obj.user_id);
   });
 
   socket.on('nofity', function (data) {

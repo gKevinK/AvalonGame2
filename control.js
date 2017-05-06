@@ -87,12 +87,12 @@ class RoomCtrl {
       }
     }
     this.seats.map(function(seat) {
-      seat.notify(JSON.stringify({ event: 'join', order: o + 1, name: name }));
+      seat.notify(JSON.stringify({ type: 'join', order: o + 1, name: name }));
     });
     this.seats[order].occupy(socket, user_id);
     console.log('Room ' + this.room_id + ', player ' + order + ' ' + name + ' joined.');
     if (this.seats.every(s => s.status == 0)) {
-      setTimeout(() => this.machine._start(), 1);
+      setTimeout(() => this.machine.start(), 0);
     }
     return order;
   }
@@ -138,7 +138,7 @@ class RoomCtrl {
   exit(order) {
     this.seats[order].leave();
     for (var seat of this.seats) {
-      seat.notify(JSON.stringify({ event: 'exit', order: order + 1 }));
+      seat.notify(JSON.stringify({ type: 'exit-i', order: order + 1 }));
     }
     console.log('Room ' + this.room_id + ', player ' + order + ' exit.');
     for (var seat of this.seats) {
