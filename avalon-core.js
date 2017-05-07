@@ -58,11 +58,9 @@ class AvalonMachine {
     this.c_taskvote.length = this.pnum;
     this.result = [ -1, -1, -1, -1, -1 ];
     this.tpn = config.task_player_num[player_num];
-    // TODO
   }
 
   start() {
-    // TODO
     console.log(this.roles);
     this.roles.map((v, i) => {
       var knowledge = [];
@@ -77,7 +75,7 @@ class AvalonMachine {
             knowledge.push(i1);
         });
       }
-      this.notify([i], { role: v, known: knowledge });
+      this.notify([i], { type: 'knowledge', role: v, known: knowledge });
     });
 
     this.status = STATUS.MakeTeam;
@@ -97,7 +95,6 @@ class AvalonMachine {
   }
 
   _teamVote(order, agree) {
-    // TODO
     this.c_teamvote[order] = agree;
     this.notify([], { type: 'team-vote-i', content: order });
     if (this.c_teamvote.findIndex(-1) == -1) {
@@ -120,7 +117,6 @@ class AvalonMachine {
   }
 
   _taskVote(order, success) {
-    // TODO
     this.c_taskvote[order] = success;
     this.notify([], { type: 'task-vote-i', content: order });
     var failNum = this.c_taskvote.filter(v => v == 1).length;
@@ -157,6 +153,8 @@ class AvalonMachine {
   getStatus(order) {
     // TODO
     return {
+      player_num: this.pnum,
+      role: this.roles[order],
       round: this.c_round,
       try: this.c_try,
       capital: this.c_capital,

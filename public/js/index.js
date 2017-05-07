@@ -133,18 +133,23 @@ var GameVM = new Vue({
     player_stat: shared.player_stat,
     round: 0,
     try: 0,
+    capital: 0,
     result: [ -1, -1, -1, -1, -1 ],
     role: 0,
     knowledge: [],
     team: [],
     selections: [],
+    teamvote: [],
     vote_i: [],
     vote: '',
     target: '',
   },
+  computed: {
+
+  },
   methods: {
     makeTeam: function () {
-      socket.emit('make-team', JSON.stringify({ list: this.selections }));
+      socket.emit('make-team', JSON.stringify({ list: this.selections.map(parseInt) }));
     },
     teamVote: function () {
       socket.emit('team-vote', JSON.stringify({ vote: parseInt(this.vote) }));
@@ -165,26 +170,35 @@ var GameVM = new Vue({
         case 'exit':
           this.player_stat[obj.order] = 0;
           break;
+        case 'knowledge':
+          this.role = obj.role;
+          this.knowledge = obj.known;
+          break;
         case 'make-team':
           this.status = GSTATUS.MakeTeam;
+          this.round = obj.round;
+          this.try = obj.try;
+          this.capital = obj.player;
+          this.vote_i.fill(0);
           break;
         case 'team-vote':
           this.status = GSTATUS.TeamVote;
           this.team = obj.content;
+          this.vote_i.fill(0);
           break;
         case 'team-res':
           // TODO
-          this.teamVote
+          this.teamvote = obj.content;
           dialogNotify(obj.content);
           break;
         case 'team-vote-i':
-          // TODO
+          this.vote_i[obj.content] = 1;
           break;
         case 'task-vote':
           this.status = GSTATUS.TaskVote;
           break;
         case 'task-vote-i':
-          // TODO
+          this.vote_i[obj.content] = 1;
           break;
         case 'assassin':
           this.status = GSTATUS.Assassin;
