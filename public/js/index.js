@@ -145,7 +145,13 @@ var GameVM = new Vue({
     target: '',
   },
   computed: {
-
+    knowledge_str: function() {
+      if (this.knowledge.length == 0) {
+        return '';
+      } else {
+        return '已知身份： ' + this.knowledge.map(function(i) { return i+1;}).join(' 号、') + ' 号';
+      }
+    },
   },
   methods: {
     makeTeam: function () {
@@ -158,11 +164,14 @@ var GameVM = new Vue({
       socket.emit('task-vote', JSON.stringify({ vote: parseInt(this.vote) }));
     },
     assassin: function () {
-      socket.emit('assassin', JSON.stringify({ target: this.target }));
+      socket.emit('assassin', JSON.stringify({ target: parseInt(this.target) }));
     },
     onNotify: function (msg) {
       var obj = JSON.parse(msg);
       switch (obj.type) {
+        case 'init':
+          // TODO
+          break;
         case 'join-i':
           this.player_name[obj.order] = obj.name;
           this.player_stat[obj.order] = 1;
@@ -173,6 +182,7 @@ var GameVM = new Vue({
         case 'knowledge':
           this.role = obj.role;
           this.knowledge = obj.known;
+          // TODO: Notify
           break;
         case 'make-team':
           this.status = GSTATUS.MakeTeam;

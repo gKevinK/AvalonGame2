@@ -153,11 +153,13 @@ class AvalonMachine {
   getStatus(order) {
     // TODO
     return {
+      status: this.status,
       player_num: this.pnum,
       role: this.roles[order],
       round: this.c_round,
       try: this.c_try,
       capital: this.c_capital,
+      result: this.result,
       team: this.c_team,
       teamvote: this.c_teamvote.map(v => v >= 0),
       taskvote: this.c_taskvote.map(v => v >= 0),
