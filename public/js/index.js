@@ -42,15 +42,15 @@ function role_id2name(id) {
   return ROLE[id];
 }
 
-// Vue.component('player', {
-//   template: '\
-//         <li>\
-//             {{ nickname }}\
-//         <button @click="something">X</button>\
-//         </li>\
-//     ',
-//   props: ['nickname']
-// });
+var player_comp = {
+  template: '\
+        <li>\
+            {{ nickname }}\
+        <button @click="something">X</button>\
+        </li>\
+    ',
+  props: ['nickname', 'order'],
+}
 
 Vue.component('message', {
   template: '<p>{{ msg.order }} - {{* msg.order | order2name }}: {{ msg.text }}</p>',
@@ -126,6 +126,9 @@ var MsgVM = new Vue({
 
 var GameVM = new Vue({
   el: '#game-panel',
+  components: {
+    player: player_comp,
+  },
   data: {
     status: GSTATUS.Wait,
     player_num: shared.player_num,
@@ -149,7 +152,7 @@ var GameVM = new Vue({
       if (this.knowledge.length == 0) {
         return '';
       } else {
-        return '已知身份： ' + this.knowledge.map(function(i) { return i+1;}).join(' 号、') + ' 号';
+        return '已知身份： ' + this.knowledge.map(function(i) { return i+1; }).join(' 号、') + ' 号';
       }
     },
   },
@@ -173,11 +176,11 @@ var GameVM = new Vue({
           // TODO
           break;
         case 'join-i':
-          this.player_name[obj.order] = obj.name;
-          this.player_stat[obj.order] = 1;
+          this.player_name.splice(obj.order, 1, obj.name);
+          this.player_stat.splice(obj.order, 1, 1);
           break;
         case 'exit':
-          this.player_stat[obj.order] = 0;
+          this.player_stat.splice(obj.order, 1, 0);
           break;
         case 'knowledge':
           this.role = obj.role;
@@ -202,13 +205,13 @@ var GameVM = new Vue({
           dialogNotify(obj.content);
           break;
         case 'team-vote-i':
-          this.vote_i[obj.content] = 1;
+          this.vote_i.splice(obj.content, 1, 1);
           break;
         case 'task-vote':
           this.status = GSTATUS.TaskVote;
           break;
         case 'task-vote-i':
-          this.vote_i[obj.content] = 1;
+          this.vote_i.splice(obj.content, 1, 1);
           break;
         case 'assassin':
           this.status = GSTATUS.Assassin;

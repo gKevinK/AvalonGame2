@@ -161,8 +161,7 @@ class AvalonMachine {
       capital: this.c_capital,
       result: this.result,
       team: this.c_team,
-      teamvote: this.c_teamvote.map(v => v >= 0),
-      taskvote: this.c_taskvote.map(v => v >= 0),
+      vote_i: (this.status == STATUS.TeamVote ? this.c_teamvote : this.c_taskvote).map(v => v >= 0),
     }
   }
 
