@@ -42,16 +42,6 @@ function role_id2name(id) {
   return ROLE[id];
 }
 
-var player_comp = {
-  template: '\
-        <li>\
-            {{ nickname }}\
-        <button @click="something">X</button>\
-        </li>\
-    ',
-  props: ['nickname', 'order'],
-}
-
 Vue.component('message', {
   template: '<p>{{ msg.order }} - {{* msg.order | order2name }}: {{ msg.text }}</p>',
   props: ['msg'],
@@ -124,6 +114,16 @@ var MsgVM = new Vue({
   }
 });
 
+// var player_comp = {
+//   template: '\
+//         <li>\
+//             {{ nickname }}\
+//         <button @click="something">X</button>\
+//         </li>\
+//     ',
+//   props: ['nickname', 'order'],
+// }
+
 var GameVM = new Vue({
   el: '#game-panel',
   components: {
@@ -132,6 +132,7 @@ var GameVM = new Vue({
   data: {
     status: GSTATUS.Wait,
     player_num: shared.player_num,
+    players: [],
     player_name: shared.player_name,
     player_stat: shared.player_stat,
     round: 0,
