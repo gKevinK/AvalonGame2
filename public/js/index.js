@@ -126,9 +126,13 @@ var MsgVM = new Vue({
 
 var GameVM = new Vue({
   el: '#game-panel',
-  components: {
-    player: player_comp,
-  },
+  template: '\
+    <div v-for="(item, index) in players">\
+      <div>{{ item.name }}</div>\
+      <div v-if="item.inteam && status == 2 && status == 3"></div>\
+      <input v-model="item.isselect" v-if="status == 2">\
+    </div>\
+  ',
   data: {
     status: GSTATUS.Wait,
     player_num: shared.player_num,
