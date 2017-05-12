@@ -127,10 +127,12 @@ var MsgVM = new Vue({
 var GameVM = new Vue({
   el: '#game-panel',
   template: '\
-    <div v-for="(item, index) in players">\
-      <div>{{ item.name }}</div>\
-      <div v-if="item.inteam && status == 2 && status == 3"></div>\
-      <input v-model="item.isselect" v-if="status == 2">\
+    <div>\
+      <div v-for="(item, index) in players">\
+        <div>{{ item.name }}</div>\
+        <div v-if="item.inteam && status == 2 && status == 3"></div>\
+        <input v-model="item.isselect" v-if="status == 2">\
+      </div>\
     </div>\
   ',
   data: {
@@ -145,10 +147,10 @@ var GameVM = new Vue({
     result: [ -1, -1, -1, -1, -1 ],
     role: 0,
     knowledge: [],
-    team: [],
-    selections: [],
-    teamvote: [],
-    vote_i: [],
+    // team: [],
+    // selections: [],
+    // teamvote: [],
+    // vote_i: [],
     vote: '',
     target: '',
   },
