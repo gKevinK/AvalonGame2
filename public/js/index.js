@@ -129,10 +129,17 @@ var GameVM = new Vue({
   template: '\
     <div>\
       <div v-for="(item, index) in players">\
+        <span>{{ index + 1 }}</span>\
         <div>{{ item.name }}</div>\
         <div v-if="item.inteam && status == 2 && status == 3"></div>\
-        <input v-model="item.isselect" v-if="status == 2">\
+        <input v-if="status == 2" type="checkbox" v-model="selections" >\
+        <input v-if="status == 4" type="radio" v-model="selection">\
       </div>\
+      <div><span></span><button>确定</button></div>\
+      <div><span>组队</span><button>确定</button></div>\
+      <div><span>同意/反对</span><button>确定</button></div>\
+      <div><span>成功/失败</span><button>确定</button></div>\
+      <div><span>刺杀目标</span><button>确定</button></div>\
     </div>\
   ',
   data: {
@@ -148,7 +155,7 @@ var GameVM = new Vue({
     role: 0,
     knowledge: [],
     // team: [],
-    // selections: [],
+    selections: [],
     // teamvote: [],
     // vote_i: [],
     vote: '',
