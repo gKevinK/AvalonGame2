@@ -131,15 +131,19 @@ var GameVM = new Vue({
       <div v-for="(item, index) in players">\
         <span>{{ index + 1 }}</span>\
         <div>{{ item.name }}</div>\
-        <div v-if="item.inteam && status == 2 && status == 3"></div>\
-        <input v-if="status == 2" type="checkbox" v-model="selections" >\
-        <input v-if="status == 4" type="radio" v-model="selection">\
+        <div v-if="item.inteam && (status == 2 || status == 3)"></div>\
+        <input v-if="status == 2" type="checkbox" v-model="selections" :value="index">\
+        <input v-if="status == 4" type="radio" v-model="target" :value="index">\
       </div>\
       <div><span></span><button>确定</button></div>\
       <div><span>组队</span><button>确定</button></div>\
-      <div><span>同意/反对</span><button>确定</button></div>\
-      <div><span>成功/失败</span><button>确定</button></div>\
-      <div><span>刺杀目标</span><button>确定</button></div>\
+      <div><span>同意/反对</span>\
+        <input type="radio" v-model="vote" value="1"><input type="radio" v-model="vote" value="0">\
+        <button>确定</button></div>\
+      <div><span>成功/失败</span>\
+        <input type="radio" v-model="vote" value="1"><input type="radio" v-model="vote" value="0">\
+        <button>确定</button></div>\
+      <div><span>刺杀目标</span><span>{{ target }} 号</span><button>确定</button></div>\
     </div>\
   ',
   data: {
