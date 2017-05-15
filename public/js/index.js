@@ -214,7 +214,10 @@ var GameVM = new Vue({
           break;
         case 'team-vote':
           this.status = GSTATUS.TeamVote;
-          this.team = obj.content;
+          // this.team = obj.content;
+          this.player.map(function (v) { v.inteam = false });
+          obj.content.map(function (v) { this.players.inteam = true });
+          this.vote = '';
           this.vote_i.fill(0);
           break;
         case 'team-res':
@@ -227,6 +230,7 @@ var GameVM = new Vue({
           break;
         case 'task-vote':
           this.status = GSTATUS.TaskVote;
+          this.vote = '';
           break;
         case 'task-vote-i':
           this.vote_i.splice(obj.content, 1, 1);
