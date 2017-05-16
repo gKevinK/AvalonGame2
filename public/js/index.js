@@ -108,8 +108,9 @@ var MsgVM = new Vue({
       socket.emit('msg', this.message);
       this.message = '';
     },
-    onMsg: function () {
-
+    onMsg: function (msg) {
+      // TODO
+      this.messages.push(msg);
     }
   }
 });

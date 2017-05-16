@@ -15,7 +15,7 @@
   <div id="join-panel">
     <input type="text" v-model="name">
     <input type="text" v-model="room_id">
-    <select v-model="player_num">
+    <select v-model.number="player_num">
       <option>5</option>
       <option>6</option>
       <option>7</option>
@@ -29,11 +29,7 @@
     <button @click="join">加入</button>
   </div>
 
-  <div id="game-panel">
-    <template v-for="p in players">
-      <a/>
-    </template>
-  </div>
+  <div id="game-panel"></div>
 
   <div id="msg-panel">
     <message v-for="msg in messages" ></message>
