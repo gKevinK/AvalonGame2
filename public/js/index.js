@@ -42,14 +42,6 @@ function role_id2name(id) {
   return ROLE[id];
 }
 
-Vue.component('message', {
-  template: '<p>{{ msg.order }} - {{* msg.order | order2name }}: {{ msg.text }}</p>',
-  props: ['msg'],
-  filters: {
-    order2name: order2name,
-  }
-});
-
 var socket;
 var shared = {
   status: STATUS.Idle,
@@ -97,33 +89,41 @@ var JoinVM = new Vue({
   }
 })
 
+var MessageC = {
+  template: '<p>{{ msg.order }} - {{* msg.order | order2name }}: {{ msg.text }}</p>',
+  props: ['msg'],
+  filters: {
+    order2name: order2name,
+  }
+}
+
 var MsgVM = new Vue({
+  el: '#msg-panel',
+  components: {
+    'message': MessageC,
+  },
+  data: {
+    messages: [],
+  },
+  methods: {
+    onMsg: function (msg) {
+      this.messages.push(msg);
+    }
+  }
+});
+
+var MsgSendVM = new Vue({
   el: '#msg-form',
   data: {
     message: '',
-    messages: [],
   },
   methods: {
     send: function () {
       socket.emit('msg', this.message);
       this.message = '';
     },
-    onMsg: function (msg) {
-      // TODO
-      this.messages.push(msg);
-    }
   }
 });
-
-// var player_comp = {
-//   template: '\
-//         <li>\
-//             {{ nickname }}\
-//         <button @click="something">X</button>\
-//         </li>\
-//     ',
-//   props: ['nickname', 'order'],
-// }
 
 var GameVM = new Vue({
   el: '#game-panel',
@@ -137,14 +137,16 @@ var GameVM = new Vue({
         <input v-if="status == 4" type="radio" v-model="target" :value="index">\
       </div>\
       <div><span></span><button>确定</button></div>\
-      <div><span>组队</span><button>确定</button></div>\
-      <div><span>同意/反对</span>\
-        <input type="radio" v-model="vote" value="1"><input type="radio" v-model="vote" value="0">\
-        <button>确定</button></div>\
-      <div><span>成功/失败</span>\
-        <input type="radio" v-model="vote" value="1"><input type="radio" v-model="vote" value="0">\
-        <button>确定</button></div>\
-      <div><span>刺杀目标</span><span>{{ target }} 号</span><button>确定</button></div>\
+      <div v-if="status == 1"><span>组队</span><button @click="makeTeam">确定</button></div>\
+      <div v-if="status == 2"><span>同意/反对</span>\
+        <input type="radio" v-model="vote" value="1"><label>同意</label>\
+        <input type="radio" v-model="vote" value="0"><label>反对</label>\
+        <button @click="teamVote">确定</button></div>\
+      <div v-if="status == 3"><span>成功/失败</span>\
+        <input type="radio" v-model="vote" value="1"><label>成功</label>\
+        <input type="radio" v-model="vote" value="0"><label>失败</label>\
+        <button @click="taskVote">确定</button></div>\
+      <div><span>刺杀目标</span><span>{{ target }} 号</span><button @click="assassin">确定</button></div>\
     </div>\
   ',
   data: {

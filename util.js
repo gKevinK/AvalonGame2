@@ -7,7 +7,7 @@ module.exports.randomRange = function (n) {
   for (var i = 0; i < n; i++) {
     randarr.push(Math.random());
   }
-  return range(n).sort(function (a, b) {
+  return module.exports.range(n).sort(function (a, b) {
     return randarr[a] - randarr[b];
   });
 }

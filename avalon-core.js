@@ -47,7 +47,7 @@ class AvalonMachine {
     this.notify = notify_callback;
 
     this.status = STATUS.Wait;
-    this.roles = shuffleCopy(config.role[player_num]);
+    this.roles = Util.shuffleCopy(config.role[player_num]);
     this.c_round = 0;
     this.c_try = 0;
     this.c_capital = 0;

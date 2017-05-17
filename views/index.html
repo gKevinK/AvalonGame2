@@ -32,12 +32,12 @@
   <div id="game-panel"></div>
 
   <div id="msg-panel">
-    <message v-for="msg in messages" ></message>
+    <message v-for="msg in messages" :msg="msg"></message>
   </div>
 
   <form id="msg-form" @submit.prevent="send">
-    <input type="text"v-model="message" >
-    <button type="submit">Send</button>
+    <input type="text" v-model="message" placeholder="Message...">
+    <button type="submit">→</button>
   </form>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.6/vue.min.js"></script>

@@ -110,7 +110,7 @@ class RoomCtrl {
     for (var seat of this.seats) {
       if (seat) {
         seat.message(JSON.stringify({
-          player_order: order + 1, text: text,
+          order: order + 1, text: text,
         }));
       }
     }
