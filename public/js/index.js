@@ -90,11 +90,12 @@ var JoinVM = new Vue({
 })
 
 var MessageC = {
-  template: '<p>{{ msg.order }} - {{* msg.order | order2name }}: {{ msg.text }}</p>',
+  // template: '<p>{{ msg.order }} - {{* msg.order | order2name }}: {{ msg.text }}</p>',
+  template: '<p>{{ msg.order + 1 }} : {{ msg.text }}</p>',
   props: ['msg'],
-  filters: {
-    order2name: order2name,
-  }
+  // filters: {
+  //   order2name: order2name,
+  // }
 }
 
 var MsgVM = new Vue({
@@ -107,7 +108,7 @@ var MsgVM = new Vue({
   },
   methods: {
     onMsg: function (msg) {
-      this.messages.push(msg);
+      this.messages.push(JSON.parse(msg));
     }
   }
 });
@@ -136,7 +137,7 @@ var GameVM = new Vue({
         <input v-if="status == 2" type="checkbox" v-model="selections" :value="index">\
         <input v-if="status == 4" type="radio" v-model="target" :value="index">\
       </div>\
-      <div><span></span><button>确定</button></div>\
+      <div v-if="false"><span></span><button>确定</button></div>\
       <div v-if="status == 1"><span>组队</span><button @click="makeTeam">确定</button></div>\
       <div v-if="status == 2"><span>同意/反对</span>\
         <input type="radio" v-model="vote" value="1"><label>同意</label>\
@@ -146,7 +147,8 @@ var GameVM = new Vue({
         <input type="radio" v-model="vote" value="1"><label>成功</label>\
         <input type="radio" v-model="vote" value="0"><label>失败</label>\
         <button @click="taskVote">确定</button></div>\
-      <div><span>刺杀目标</span><span>{{ target }} 号</span><button @click="assassin">确定</button></div>\
+      <div v-if="status == 4 && role == 3"><span>刺杀目标</span><span>{{ target }} 号</span>\
+        <button @click="assassin">确定</button></div>\
     </div>\
   ',
   data: {
@@ -195,6 +197,7 @@ var GameVM = new Vue({
       switch (obj.type) {
         case 'init':
           // TODO
+
           break;
         case 'join-i':
           this.player_name.splice(obj.order, 1, obj.name);
@@ -245,6 +248,7 @@ var GameVM = new Vue({
           this.status = GSTATUS.End;
           dialogNotify((obj.result == 1 ? "好人获胜\n" : "坏人获胜\n") + obj.content); // TODO
           break;
+        default:
       }
     }
   }

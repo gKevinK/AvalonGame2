@@ -87,30 +87,37 @@ class RoomCtrl {
       }
     }
     this.seats.map(function(seat) {
-      seat.notify(JSON.stringify({ type: 'join', order: o + 1, name: name }));
+      seat.notify(JSON.stringify({ type: 'join-i', order: o, name: name }));
     });
     this.seats[order].occupy(socket, user_id);
     console.log('Room ' + this.room_id + ', player ' + order + ' ' + name + ' joined.');
     if (this.seats.every(s => s.status == 0)) {
-      setTimeout(() => this.machine.start(), 0);
+      setTimeout(() => {
+        this.machine.start();
+        console.log('Room ' + this.room_id + ' start, role: ' + this.machine.roles + '.');
+      }, 0);
     }
     return order;
   }
 
   reconnect(socket, user_id) {
-    user = this.users.get(user_id);
+    var user = this.users.get(user_id);
     user.status = 0;
     user.socket = socket;
     socket.emit('join', JSON.stringify({
-      room_id: this.room_id, user_id: user_id,
+      room_id: this.room_id, user_id: user_id, order: user.order,
     }));
+    var info = this.machine.getStatus(user.order);
+    // info.player_name = this.seats.map(s => s.name());
+    socket.emit('init', JSON.stringify(info));
+    socket.emit('history-msg', this.seats[user.order].history_msg);
   }
 
   message(order, text) {
     for (var seat of this.seats) {
       if (seat) {
         seat.message(JSON.stringify({
-          order: order + 1, text: text,
+          order: order, text: text,
         }));
       }
     }
@@ -138,7 +145,7 @@ class RoomCtrl {
   exit(order) {
     this.seats[order].leave();
     for (var seat of this.seats) {
-      seat.notify(JSON.stringify({ type: 'exit-i', order: order + 1 }));
+      seat.notify(JSON.stringify({ type: 'exit-i', order: order }));
     }
     console.log('Room ' + this.room_id + ', player ' + order + ' exit.');
     for (var seat of this.seats) {

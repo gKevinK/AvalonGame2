@@ -50,7 +50,7 @@ class AvalonMachine {
     this.roles = Util.shuffleCopy(config.role[player_num]);
     this.c_round = 0;
     this.c_try = 0;
-    this.c_capital = 0;
+    this.c_capital = -1;
     this.c_team = [];
     this.c_teamvote = [];
     this.c_teamvote.length = this.pnum;
@@ -61,7 +61,8 @@ class AvalonMachine {
   }
 
   start() {
-    console.log(this.roles);
+    this.roles = Util.shuffleCopy(config.role[player_num]);
+    // console.log(this.roles);
     this.roles.map((v, i) => {
       var knowledge = [];
       if (v == ROLE.Merlin) {
