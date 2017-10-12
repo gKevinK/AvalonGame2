@@ -1,6 +1,6 @@
 export default interface IGameMachine {
-    NotifyCallback : {(orders: Array<number>, msg: object) : void};
+    NotifyCallback : {(nums: Array<number>, msg: object) : void};
     Start() : void;
-    Operate(order: number, operation: { op: string }) : boolean;
-    GetStatus(order: number) : object;
+    Operate(num: number, operation: { op: string }) : boolean;
+    GetStatus(num: number) : object;
 }

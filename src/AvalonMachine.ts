@@ -59,14 +59,34 @@ export default class AvalonMachine implements IGameMachine {
         this.NotifyCallback = (os, m) => {};
     }
     
-    public NotifyCallback : (orders: number[], msg: object) => void;
+    public NotifyCallback : (nums: number[], msg: object) => void;
     
     public Start(): void {
         throw new Error("Method not implemented.");
     }
 
-    public Operate(order: number, operation: object): boolean {
+    public Operate(num: number, operation: object): boolean {
         throw new Error("Method not implemented.");
+    }
+
+    makeTeam(): void {
+
+    }
+
+    teamVote(num: number, array: Array<number>): void {
+
+    }
+
+    taskVote(num: number, success: boolean): void {
+
+    }
+
+    taskEndWith(success: boolean): void {
+
+    }
+
+    assassin(target: number): void {
+        
     }
 
     public GetStatus(order: number): object {
