@@ -1,7 +1,8 @@
 // declare var require: any;
 const express = require('express');
 const socketio = require('socket.io');
-// import RoomCtrl = require('./control');
+import UserManager from "./UserManage";
+import RoomManager from './RoomManage';
 
 const app = express();
 const server = require('http').createServer(app);
