@@ -1,18 +1,3 @@
-const STATUS = {
-  Idle: 0,
-  Wait: 1,
-  Play: 2,
-};
-
-const GSTATUS = {
-  Wait: 0,
-  MakeTeam: 1,
-  TeamVote: 2,
-  TaskVote: 3,
-  Assassin: 4,
-  End: 5,
-};
-
 const ROLE = {
   0: '梅林',
   1: '派西维尔',
