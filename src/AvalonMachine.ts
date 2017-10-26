@@ -59,37 +59,58 @@ export default class AvalonMachine implements IGameMachine {
         this.NotifyCallback = (os, m) => {};
     }
     
-    public NotifyCallback : (nums: number[], msg: object) => void;
+    NotifyCallback : (nums: number[], msg: object) => void;
     
-    public Start(): void {
-        throw new Error("Method not implemented.");
-    }
-
-    public Operate(num: number, operation: object): boolean {
-        throw new Error("Method not implemented.");
-    }
-
-    makeTeam(): void {
-
-    }
-
-    teamVote(num: number, array: Array<number>): void {
-
-    }
-
-    taskVote(num: number, success: boolean): void {
-
-    }
-
-    taskEndWith(success: boolean): void {
-
-    }
-
-    assassin(target: number): void {
+    Start(): void {
+        this.round = 0;
+        this.try = 0;
+        this.capital = 0;
+        this.team.length = config.task_player_num[this.pcount][this.round];
         
+        throw new Error("Method not implemented.");
     }
 
-    public GetStatus(order: number): object {
+    Operate(num: number, operation: { op: string }): boolean {
+        switch (operation.op) {
+            case "make-team":
+                this.makeTeam([]);
+                break;
+            case "team-vote":
+                this.teamVote(num, []);
+                break;
+            case "task-vote":
+                this.taskVote(num, true);
+                break;
+            case "assassin":
+                this.assassin(0);
+                break;
+        }
+        throw new Error("Method not implemented.");
+    }
+    
+    private makeTeam(array: Array<number>): void {
+        // TODO
+    }
+
+    private teamVote(num: number, array: Array<number>): void {
+        // TODO
+    }
+
+    private taskVote(num: number, success: boolean): void {
+        // TODO
+    }
+
+    private taskEndWith(success: boolean): void {
+        // TODO
+    }
+
+    private assassin(target: number): void {
+        // TODO
+
+        this.NotifyCallback([], { "game-result": 1 });
+    }
+
+    GetStatus(order: number): object {
         throw new Error("Method not implemented.");
     }
 
