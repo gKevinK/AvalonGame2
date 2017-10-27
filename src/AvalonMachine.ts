@@ -70,22 +70,21 @@ export default class AvalonMachine implements IGameMachine {
         throw new Error("Method not implemented.");
     }
 
-    Operate(num: number, operation: { op: string }): boolean {
+    Operate(num: number, operation: { op: string, t: number, ts: Array<number> }): boolean {
         switch (operation.op) {
             case "make-team":
-                this.makeTeam([]);
+                this.makeTeam(operation.ts);
                 break;
             case "team-vote":
-                this.teamVote(num, []);
+                this.teamVote(num, operation.ts);
                 break;
             case "task-vote":
-                this.taskVote(num, true);
+                this.taskVote(num, operation.t === 1);
                 break;
             case "assassin":
                 this.assassin(0);
                 break;
         }
-        throw new Error("Method not implemented.");
     }
     
     private makeTeam(array: Array<number>): void {
