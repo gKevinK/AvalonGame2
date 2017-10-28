@@ -56,7 +56,10 @@ export default class AvalonMachine implements IGameMachine {
     result: Array<number> = [ -1, -1, -1, -1, -1 ];
 
     constructor(player_count: number) {
+        this.pcount = player_count;
         this.NotifyCallback = (os, m) => {};
+
+        throw new Error("Method not implemented.");
     }
     
     NotifyCallback : (nums: number[], msg: object) => void;
@@ -67,6 +70,8 @@ export default class AvalonMachine implements IGameMachine {
         this.capital = 0;
         this.team.length = config.task_player_num[this.pcount][this.round];
         
+        this.NotifyCallback([], { type: 'make-team', capital: this.capital,
+                                  round: this.round, try: this.try });
         throw new Error("Method not implemented.");
     }
 
@@ -89,6 +94,10 @@ export default class AvalonMachine implements IGameMachine {
     
     private makeTeam(array: Array<number>): void {
         // TODO
+        this.team = array;
+        // this.teamvote.fill(-1);
+        this.status = STATUS.TeamVote;
+        this.NotifyCallback([], { type: 'team-vote', team: this.team });
     }
 
     private teamVote(num: number, array: Array<number>): void {
@@ -96,7 +105,14 @@ export default class AvalonMachine implements IGameMachine {
     }
 
     private taskVote(num: number, success: boolean): void {
-        // TODO
+        this.taskvote[num] = success ? 1 : 0;
+        this.NotifyCallback([], { type: 'task-vote-i', i: num });
+        let failNum = this.taskvote.filter(v => v == 1).length;
+        if (failNum == 0 || (this.pcount >= 7 && this.round == 3 && failNum == 1)) {
+            this.taskEndWith(true);
+        } else {
+            this.taskEndWith(false);
+        }
     }
 
     private taskEndWith(success: boolean): void {
