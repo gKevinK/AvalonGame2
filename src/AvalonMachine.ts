@@ -81,15 +81,16 @@ export default class AvalonMachine implements IGameMachine {
                 this.makeTeam(operation.ts);
                 break;
             case "team-vote":
-                this.teamVote(num, operation.ts);
+                this.teamVote(num, operation.t == 1);
                 break;
             case "task-vote":
-                this.taskVote(num, operation.t === 1);
+                this.taskVote(num, operation.t == 1);
                 break;
             case "assassin":
                 this.assassin(0);
                 break;
         }
+        return true; // TODO : Return operation's result
     }
     
     private makeTeam(array: Array<number>): void {
@@ -100,8 +101,18 @@ export default class AvalonMachine implements IGameMachine {
         this.NotifyCallback([], { type: 'team-vote', team: this.team });
     }
 
-    private teamVote(num: number, array: Array<number>): void {
+    private teamVote(num: number, agree: boolean): void {
         // TODO
+        this.teamvote[num] = agree ? 1 : 0;
+        this.NotifyCallback([], { type: 'team-vote-i', i: num });
+        if (this.teamvote.filter(v => v == -1).length == 0) {
+            this.NotifyCallback([], { type: 'team-vote-res', res: this.teamVote });
+            if (this.teamvote.filter(v => v == 1).length * 2 > this.pcount) {
+                this.NotifyCallback([], { type: 'task-vote', team: this.team });
+            } else {
+                this.NotifyCallback([], { type: 'team-vote' });
+            }
+        }
     }
 
     private taskVote(num: number, success: boolean): void {
