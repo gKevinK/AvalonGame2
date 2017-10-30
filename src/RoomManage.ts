@@ -25,10 +25,10 @@ export class Room
 
 export default class RoomManager
 {
-    rooms: Map<string, Room>;
+    rooms: Array<Room>;
 
     constructor() {
-        this.rooms = new Map<string, Room>();
+        this.rooms = new Array<Room>();
     }
 
     GetRoom(id: string): Room {

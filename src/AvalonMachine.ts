@@ -40,8 +40,15 @@ const config = {
     },
 }
 
-export default class AvalonMachine implements IGameMachine {
+interface IOperationObject
+{
+    op: string;
+    t: number;
+    ts: Array<number>;
+}
 
+export default class AvalonMachine implements IGameMachine
+{
     pcount: number;
     status: STATUS;
     roles: Array<ROLE>;
@@ -75,16 +82,17 @@ export default class AvalonMachine implements IGameMachine {
         throw new Error("Method not implemented.");
     }
 
-    Operate(num: number, operation: { op: string, t: number, ts: Array<number> }): boolean {
-        switch (operation.op) {
+    Operate(num: number, operation: object): boolean {
+        let opr = <IOperationObject>operation;
+        switch (opr.op) {
             case "make-team":
-                this.makeTeam(operation.ts);
+                this.makeTeam(opr.ts);
                 break;
             case "team-vote":
-                this.teamVote(num, operation.t == 1);
+                this.teamVote(num, opr.t == 1);
                 break;
             case "task-vote":
-                this.taskVote(num, operation.t == 1);
+                this.taskVote(num, opr.t == 1);
                 break;
             case "assassin":
                 this.assassin(0);
@@ -136,8 +144,16 @@ export default class AvalonMachine implements IGameMachine {
         this.NotifyCallback([], { "game-result": 1 });
     }
 
-    GetStatus(order: number): object {
-        throw new Error("Method not implemented.");
+    GetStatus(num: number): object {
+        return {
+            pcount: this.pcount,
+            status: this.status,
+            roles: [],
+            round: this.round,
+            try: this.try,
+            capital: this.capital,
+            // TODO
+        };
     }
 
 }
