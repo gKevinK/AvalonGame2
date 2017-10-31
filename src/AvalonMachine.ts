@@ -84,32 +84,34 @@ export default class AvalonMachine implements IGameMachine
 
     Operate(num: number, operation: object): boolean {
         let opr = <IOperationObject>operation;
+        let res: boolean = true;
         switch (opr.op) {
             case "make-team":
-                this.makeTeam(opr.ts);
+                res = this.makeTeam(opr.ts);
                 break;
             case "team-vote":
-                this.teamVote(num, opr.t == 1);
+                res = this.teamVote(num, opr.t == 1);
                 break;
             case "task-vote":
-                this.taskVote(num, opr.t == 1);
+                res = this.taskVote(num, opr.t == 1);
                 break;
             case "assassin":
-                this.assassin(0);
+                res = this.assassin(0);
                 break;
         }
-        return true; // TODO : Return operation's result
+        return res;
     }
     
-    private makeTeam(array: Array<number>): void {
+    private makeTeam(array: Array<number>): boolean {
         // TODO
         this.team = array;
         // this.teamvote.fill(-1);
         this.status = STATUS.TeamVote;
         this.NotifyCallback([], { type: 'team-vote', team: this.team });
+        return true;
     }
 
-    private teamVote(num: number, agree: boolean): void {
+    private teamVote(num: number, agree: boolean): boolean {
         // TODO
         this.teamvote[num] = agree ? 1 : 0;
         this.NotifyCallback([], { type: 'team-vote-i', i: num });
@@ -121,9 +123,10 @@ export default class AvalonMachine implements IGameMachine
                 this.NotifyCallback([], { type: 'team-vote' });
             }
         }
+        return true;
     }
 
-    private taskVote(num: number, success: boolean): void {
+    private taskVote(num: number, success: boolean): boolean {
         this.taskvote[num] = success ? 1 : 0;
         this.NotifyCallback([], { type: 'task-vote-i', i: num });
         let failNum = this.taskvote.filter(v => v == 1).length;
@@ -132,16 +135,18 @@ export default class AvalonMachine implements IGameMachine
         } else {
             this.taskEndWith(false);
         }
+        return true;
     }
 
     private taskEndWith(success: boolean): void {
         // TODO
     }
 
-    private assassin(target: number): void {
+    private assassin(target: number): boolean {
         // TODO
 
         this.NotifyCallback([], { "game-result": 1 });
+        return true;
     }
 
     GetStatus(num: number): object {
