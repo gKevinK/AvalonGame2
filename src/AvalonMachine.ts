@@ -1,4 +1,4 @@
-import IGameMachine from './IGameMachine'
+import IGameMachine from './IGameMachine';
 
 enum ROLE {
     Merlin,
