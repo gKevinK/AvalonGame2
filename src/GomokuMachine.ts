@@ -11,7 +11,7 @@ export default class GomokuMachine implements IGameMachine
 
     Start() : void
     {
-
+        throw new Error("Method not implemented.");
     }
 
     Operate(num: number, operation: object) : boolean
