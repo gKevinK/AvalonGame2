@@ -1,5 +1,23 @@
 import IGameMachine from './IGameMachine';
 
+//#region Help functions
+function shuffleCopy (array: Array<any>) {
+    var randarr = [];
+    for (var i = 0; i < array.length; i++) {
+    randarr.push(Math.random());
+    }
+    return array.slice().sort(function (a, b) {
+        return randarr[a] - randarr[b];
+    });
+}
+
+function randomInt (max: number) {
+    return Math.floor(Math.random() * Math.floor(max));
+}
+
+//#endregion
+
+
 enum ROLE {
     Merlin,
     Percival,
@@ -23,20 +41,20 @@ enum STATUS {
 
 const config = {
     role: {
-        5: [0, 1, 2, 3, 4],
-        6: [0, 1, 2, 2, 3, 4],
-        7: [0, 1, 2, 2, 3, 4, 6],
-        8: [0, 1, 2, 2, 2, 3, 4, 7],
-        9: [0, 1, 2, 2, 2, 2, 3, 4, 5],
-        10: [0, 1, 2, 2, 2, 2, 3, 4, 5, 6]
+        5:  [0, 1, 2, 3, 4],
+        6:  [0, 1, 2, 2, 3, 4],
+        7:  [0, 1, 2, 2, 3, 4, 6],
+        8:  [0, 1, 2, 2, 2, 3, 4, 7],
+        9:  [0, 1, 2, 2, 2, 2, 3, 4, 5],
+        10: [0, 1, 2, 2, 2, 2, 3, 4, 5, 6],
     },
     task_player_num: {
-        5: [2, 3, 2, 3, 3],
-        6: [2, 3, 4, 3, 4],
-        7: [2, 3, 3, 4, 4],
-        8: [3, 4, 4, 5, 5],
-        9: [3, 4, 4, 5, 5],
-        10: [3, 4, 4, 5, 5]
+        5:  [2, 3, 2, 3, 3],
+        6:  [2, 3, 4, 3, 4],
+        7:  [2, 3, 3, 4, 4],
+        8:  [3, 4, 4, 5, 5],
+        9:  [3, 4, 4, 5, 5],
+        10: [3, 4, 4, 5, 5],
     },
 }
 
@@ -62,24 +80,31 @@ export default class AvalonMachine implements IGameMachine
     taskvote: Array<number> = [];
     result: Array<number> = [ -1, -1, -1, -1, -1 ];
 
+    NotifyCallback : (nums: number[], msg: object) => void;
+
     constructor(player_count: number) {
         this.pcount = player_count;
         this.NotifyCallback = (os, m) => {};
 
-        throw new Error("Method not implemented.");
+        this.status = STATUS.Wait;
+        this.team = Array();
+        this.teamvote = Array(this.pcount);
+        this.taskvote = Array(this.pcount);
+        this.result = Array<number>(this.pcount).fill(-1);
     }
-    
-    NotifyCallback : (nums: number[], msg: object) => void;
     
     Start(): void {
         this.round = 0;
         this.try = 0;
-        this.capital = 0;
         this.team.length = config.task_player_num[this.pcount][this.round];
-        
+        this.roles = shuffleCopy(config.role[this.pcount]);
+
+        // TODO : Tell knowledges
+
+        this.capital = randomInt(this.pcount);
         this.NotifyCallback([], { type: 'make-team', capital: this.capital,
                                   round: this.round, try: this.try });
-        throw new Error("Method not implemented.");
+        this.status = STATUS.MakeTeam;
     }
 
     Operate(num: number, operation: object): boolean {
@@ -160,5 +185,4 @@ export default class AvalonMachine implements IGameMachine
             // TODO
         };
     }
-
 }
