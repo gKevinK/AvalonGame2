@@ -130,22 +130,30 @@ export default class AvalonMachine implements IGameMachine
     private makeTeam(array: Array<number>): boolean {
         // TODO
         this.team = array;
-        // this.teamvote.fill(-1);
+        this.teamvote.fill(-1);
         this.status = STATUS.TeamVote;
         this.NotifyCallback([], { type: 'team-vote', team: this.team });
         return true;
     }
 
     private teamVote(num: number, agree: boolean): boolean {
-        // TODO
         this.teamvote[num] = agree ? 1 : 0;
         this.NotifyCallback([], { type: 'team-vote-i', i: num });
-        if (this.teamvote.filter(v => v == -1).length == 0) {
-            this.NotifyCallback([], { type: 'team-vote-res', res: this.teamVote });
-            if (this.teamvote.filter(v => v == 1).length * 2 > this.pcount) {
-                this.NotifyCallback([], { type: 'task-vote', team: this.team });
+        if (this.teamvote.some(v => v == -1))
+            return true;
+        this.NotifyCallback([], { type: 'team-vote-res', res: this.teamVote });
+        if (this.teamvote.filter(v => v == 1).length * 2 > this.pcount) {
+            this.status = STATUS.TaskVote;
+            this.taskvote = Array(this.team.length).fill(-1);
+            this.NotifyCallback([], { type: 'task-vote', team: this.team });
+        } else {
+            if (this.try == 4) {
+                this.taskEndWith(false);
             } else {
-                this.NotifyCallback([], { type: 'team-vote' });
+                this.try += 1;
+                this.status = STATUS.MakeTeam;
+                this.NotifyCallback([], { type: 'make-team', capital: this.capital,
+                                          round: this.round, try: this.try });
             }
         }
         return true;
@@ -154,10 +162,14 @@ export default class AvalonMachine implements IGameMachine
     private taskVote(num: number, success: boolean): boolean {
         this.taskvote[num] = success ? 1 : 0;
         this.NotifyCallback([], { type: 'task-vote-i', i: num });
-        let failNum = this.taskvote.filter(v => v == 1).length;
+        if (this.taskvote.some(v => v == -1))
+            return true;
+        let failNum = this.taskvote.filter(v => v == 0).length;
         if (failNum == 0 || (this.pcount >= 7 && this.round == 3 && failNum == 1)) {
+            this.NotifyCallback([], { type: 'task-vote-res', res: failNum });
             this.taskEndWith(true);
         } else {
+            this.NotifyCallback([], { type: 'task-vote-res', res: failNum });
             this.taskEndWith(false);
         }
         return true;
@@ -165,16 +177,31 @@ export default class AvalonMachine implements IGameMachine
 
     private taskEndWith(success: boolean): void {
         // TODO
+        this.result[this.round] = success ? 1 : 0;
+        if (this.result.filter(v => v == 1).length == 3) {
+            this.status = STATUS.Assassin;
+            this.NotifyCallback([], { type: 'assassin', });
+        } else if (this.result.filter(v => v == 0).length == 3) {
+            this.status = STATUS.End;
+            this.NotifyCallback([], { type: 'end', res: 1, content: this.roles })
+        } else {
+            this.round += 1;
+            this.try = 1;
+            this.status = STATUS.MakeTeam;
+            this.NotifyCallback([], { type: 'make-team', player: this.capital,
+                                      round: this.round, try: this.try });
+        }
     }
 
     private assassin(target: number): boolean {
-        // TODO
-
-        this.NotifyCallback([], { "game-result": 1 });
+        let res = this.roles[target] == ROLE.Merlin ? 0 : 1;
+        this.status = STATUS.End;
+        this.NotifyCallback([], { type: 'end', res: res, roles: this.roles });
         return true;
     }
 
     GetStatus(num: number): object {
+        // TODO
         return {
             pcount: this.pcount,
             status: this.status,
@@ -182,7 +209,6 @@ export default class AvalonMachine implements IGameMachine
             round: this.round,
             try: this.try,
             capital: this.capital,
-            // TODO
         };
     }
 }
