@@ -99,7 +99,26 @@ export default class AvalonMachine implements IGameMachine
         this.team.length = config.task_player_num[this.pcount][this.round];
         this.roles = shuffleCopy(config.role[this.pcount]);
 
-        // TODO : Tell knowledges
+        this.roles.map((r, i) => {
+            var knowledge = [];
+            if (r == ROLE.Merlin) {
+                this.roles.map((v1, i1) => {
+                    if ([ROLE.Morgana, ROLE.Minion, ROLE.Oberon, ROLE.Assassin].some(v2 => v1 == v2))
+                        knowledge.push(i1);
+                });
+            } else if (r == ROLE.Percival) {
+                this.roles.map((v1, i1) => {
+                    if ([ROLE.Merlin, ROLE.Morgana].some(v2 => v1 == v2))
+                        knowledge.push(i1);
+                });
+            } else if ([ROLE.Morgana, ROLE.Minion, ROLE.Assassin, ROLE.Mordred].some(v1 => r == v1)) {
+                this.roles.map((v1, i1) => {
+                    if ([ROLE.Morgana, ROLE.Minion, ROLE.Assassin, ROLE.Mordred].some(v2 => v1 == v2))
+                        knowledge.push(i1);
+                });
+            }
+            this.NotifyCallback([i], { type: 'knowledge', role: r, knowledge: knowledge });
+        });
 
         this.capital = randomInt(this.pcount);
         this.NotifyCallback([], { type: 'make-team', capital: this.capital,
