@@ -85,14 +85,32 @@ export default class AvalonMachine implements IGameMachine
     constructor(player_count: number) {
         this.pcount = player_count;
         this.NotifyCallback = (os, m) => {};
-
         this.status = STATUS.Wait;
-        this.team = Array();
-        this.teamvote = Array(this.pcount);
-        this.taskvote = Array(this.pcount);
-        this.result = Array<number>(this.pcount).fill(-1);
+        this.teamvote = Array(this.pcount).fill(-1);
     }
     
+    private knowledge(num: number) : Array<number> {
+        var r = this.roles[num];
+        var knowledge = [];
+        if (r == ROLE.Merlin) {
+            this.roles.map((v1, i1) => {
+                if ([ROLE.Morgana, ROLE.Minion, ROLE.Oberon, ROLE.Assassin].some(v2 => v1 == v2))
+                    knowledge.push(i1);
+            });
+        } else if (r == ROLE.Percival) {
+            this.roles.map((v1, i1) => {
+                if ([ROLE.Merlin, ROLE.Morgana].some(v2 => v1 == v2))
+                    knowledge.push(i1);
+            });
+        } else if ([ROLE.Morgana, ROLE.Minion, ROLE.Assassin, ROLE.Mordred].some(v1 => r == v1)) {
+            this.roles.map((v1, i1) => {
+                if ([ROLE.Morgana, ROLE.Minion, ROLE.Assassin, ROLE.Mordred].some(v2 => v1 == v2))
+                    knowledge.push(i1);
+            });
+        }
+        return knowledge;
+    }
+
     Start(): void {
         this.round = 0;
         this.try = 0;
@@ -100,24 +118,7 @@ export default class AvalonMachine implements IGameMachine
         this.roles = shuffleCopy(config.role[this.pcount]);
 
         this.roles.map((r, i) => {
-            var knowledge = [];
-            if (r == ROLE.Merlin) {
-                this.roles.map((v1, i1) => {
-                    if ([ROLE.Morgana, ROLE.Minion, ROLE.Oberon, ROLE.Assassin].some(v2 => v1 == v2))
-                        knowledge.push(i1);
-                });
-            } else if (r == ROLE.Percival) {
-                this.roles.map((v1, i1) => {
-                    if ([ROLE.Merlin, ROLE.Morgana].some(v2 => v1 == v2))
-                        knowledge.push(i1);
-                });
-            } else if ([ROLE.Morgana, ROLE.Minion, ROLE.Assassin, ROLE.Mordred].some(v1 => r == v1)) {
-                this.roles.map((v1, i1) => {
-                    if ([ROLE.Morgana, ROLE.Minion, ROLE.Assassin, ROLE.Mordred].some(v2 => v1 == v2))
-                        knowledge.push(i1);
-                });
-            }
-            this.NotifyCallback([i], { type: 'knowledge', role: r, knowledge: knowledge });
+            this.NotifyCallback([i], { type: 'knowledge', role: r, knowledge: this.knowledge(i) });
         });
 
         this.capital = randomInt(this.pcount);
@@ -224,7 +225,9 @@ export default class AvalonMachine implements IGameMachine
         return {
             pcount: this.pcount,
             status: this.status,
-            roles: [],
+            role: this.roles[num],
+            knowledge: this.knowledge(num),
+            result: this.result,
             round: this.round,
             try: this.try,
             capital: this.capital,

@@ -17,9 +17,14 @@ export class Room
         this.num = num;
     }
 
-    private start() {
+    private start () {
         this.machine = new AvalonMachine(this.num);
+        this.machine.NotifyCallback = (ids, obj) => { this.notify(ids, obj) };
         this.machine.Start();
+    }
+
+    private notify (ids: Array<number>, obj: object) : void {
+
     }
 
     join () : boolean {
@@ -28,6 +33,10 @@ export class Room
 
     operate (op: string) : boolean {
         return this.machine.Operate(0, JSON.parse(op));
+    }
+
+    message (msg: string) : void {
+
     }
 
     exit () : void {

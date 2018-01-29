@@ -1,13 +1,16 @@
 // declare var require: any;
 const express = require('express');
 const socketio = require('socket.io');
-import UserManager from "./UserManage";
+import UserManager from './UserManage';
 import RoomManager from './RoomManage';
 
 const app = express();
 const server = require('http').createServer(app);
 const io = socketio(server);
 app.use('/static', express.static('public'));
+
+var userm = new UserManager();
+var roomm = new RoomManager();
 
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/views/index.html');
