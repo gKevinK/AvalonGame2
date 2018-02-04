@@ -1,5 +1,5 @@
 import IGameMachine from './IGameMachine'
-import AvalonMachine from './AvalonMachine'
+import Machine from './AvalonMachine'
 
 class Seat
 {
@@ -18,7 +18,7 @@ export class Room
     }
 
     private start () {
-        this.machine = new AvalonMachine(this.num);
+        this.machine = new Machine(this.num);
         this.machine.NotifyCallback = (ids, obj) => { this.notify(ids, obj) };
         this.machine.Start();
     }

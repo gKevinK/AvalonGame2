@@ -6,14 +6,20 @@
   "scripts": {
     "start": "node dist/App.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tsc": "tsc"
+    "build": "tsc && webpack --progress"
   },
   "author": "gkevink",
   "license": "MIT",
   "dependencies": {
-    "@types/node": "^8.0.34",
     "express": "^4.15.2",
-    "socket.io": "^1.7.3",
-    "vue": "^2.5.2"
+    "socket.io": "^2.0.4",
+    "vue": "^2.5.13"
+  },
+  "devDependencies": {
+    "@types/node": "^8.5.9",
+    "json-loader": "^0.5.7",
+    "raw-loader": "^0.5.1",
+    "source-map-loader": "^0.2.3",
+    "ts-loader": "^3.4.0"
   }
 }
