@@ -5,8 +5,9 @@ node_modules/
 .vscode/*
 
 # Build directories
-build/
 dist/
 
 # Temp Files
 temp/
+
+package-lock.json
