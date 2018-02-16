@@ -2,13 +2,14 @@ import IGameMachine from './IGameMachine';
 
 //#region Help functions
 function shuffleCopy (array: Array<any>) {
-    var randarr = [];
-    for (var i = 0; i < array.length; i++) {
-    randarr.push(Math.random());
+    var a = array.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var x = a[j];
+        a[j] = a[i];
+        a[i] = x;
     }
-    return array.slice().sort(function (a, b) {
-        return randarr[a] - randarr[b];
-    });
+    return a;
 }
 
 function randomInt (max: number) {
