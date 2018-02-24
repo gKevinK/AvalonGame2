@@ -1,22 +1,22 @@
-enum ROLE {
-    Merlin,
-    Percival,
-    Loyalist,
-    Assassin,
-    Morgana,
-    Mordred,
-    Oberon,
-    Minion,
-    // Lancelot: 8, 9,
-}
+import VM from './AvalonClient'
 
-enum STATUS {
-    Wait,
-    MakeTeam,
-    TeamVote,
-    TaskVote,
-    Assassin,
-    End,
-}
+var GameVM: VM;
 
-var GameVM;
+declare var io: any;
+var socket;
+
+function connect() {
+    socket = io();
+    socket.on('connect', function (data) {
+        
+        // socket.emit('my other event', { my: 'data' });
+    });
+
+    socket.on('msg', function (data) {
+        console.log(data);
+    });
+
+    socket.on('update', function (data) {
+        GameVM.Update(JSON.parse(data));
+    });
+}
