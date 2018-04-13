@@ -11,15 +11,15 @@
   "author": "gkevink",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.15.2",
-    "socket.io": "^2.0.4",
-    "vue": "^2.5.13"
+    "express": "^4.16.3",
+    "socket.io": "^2.1.0",
+    "vue": "^2.5.16"
   },
   "devDependencies": {
-    "@types/node": "^8.5.9",
+    "@types/node": "^9.6.4",
     "json-loader": "^0.5.7",
     "raw-loader": "^0.5.1",
     "source-map-loader": "^0.2.3",
-    "ts-loader": "^3.4.0"
+    "ts-loader": "^4.2.0"
   }
 }
