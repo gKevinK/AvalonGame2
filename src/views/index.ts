@@ -1,15 +1,16 @@
 import VM from './AvalonClient'
+declare var io: SocketIOClientStatic;
 
 var GameVM: VM;
-
-declare var io: any;
-var socket;
+// var socket;
 
 function connect() {
-    socket = io();
+    var socket = io();
     socket.on('connect', function (data) {
         
-        // socket.emit('my other event', { my: 'data' });
+        socket.emit('join', { id: '' });
+
+        
     });
 
     socket.on('msg', function (data) {

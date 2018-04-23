@@ -1,6 +1,5 @@
-// declare var require: any;
-const express = require('express');
-const socketio = require('socket.io');
+import express = require('express');
+import socketio = require('socket.io');
 import UserManager from './UserManage';
 import RoomManager from './RoomManage';
 

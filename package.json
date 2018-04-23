@@ -16,7 +16,10 @@
     "vue": "^2.5.16"
   },
   "devDependencies": {
+    "@types/express": "^4.11.1",
     "@types/node": "^9.6.4",
+    "@types/socket.io": "^1.4.33",
+    "@types/socket.io-client": "^1.4.32",
     "json-loader": "^0.5.7",
     "raw-loader": "^0.5.1",
     "source-map-loader": "^0.2.3",
