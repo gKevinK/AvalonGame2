@@ -6,13 +6,13 @@ import RoomManager from './RoomManage';
 const app = express();
 const server = require('http').createServer(app);
 const io = socketio(server);
-app.use('/static', express.static('public'));
+app.use('/static', express.static(__dirname + '/static'));
 
 var userm = new UserManager();
 var roomm = new RoomManager();
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/views/index.html');
+    res.sendFile(__dirname + '/static/index.html');
 });
 
 io.on('connection', function (socket) {
