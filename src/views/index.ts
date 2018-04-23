@@ -1,6 +1,6 @@
-import VM from './AvalonClient'
-declare var io: SocketIOClientStatic;
+import VM from './AvalonClient';
 
+declare var io: SocketIOClientStatic;
 var GameVM: VM;
 // var socket;
 

@@ -232,6 +232,7 @@ export default class AvalonMachine implements IGameMachine
             round: this.round,
             try: this.try,
             capital: this.capital,
+            team: this.team,
         };
     }
 }
