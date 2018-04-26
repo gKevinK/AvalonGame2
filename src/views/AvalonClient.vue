@@ -1,4 +1,9 @@
-import IGameVM from './IGameVM'
+<template>
+    <p>Hello world! - vue component</p>
+</template>
+
+<script lang="ts">
+import Vue from 'vue/types';
 
 enum ROLE {
     Merlin,
@@ -47,16 +52,24 @@ interface IOperationObject
     ts: Array<number>;
 }
 
-export default class AvalonVM implements IGameVM {
-    Start() {
+export default Vue.extend({
+    data: {
 
-    }
+    },
 
-    Update (opr: object) {
+    methods: {
 
-    }
+    },
 
-    InitStatus (obj: object) {
+    computed: {
 
-    }
+    },
+});
+
+</script>
+
+<style scoped>
+p {
+    color: violet;
 }
+</style>

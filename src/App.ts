@@ -1,5 +1,5 @@
-import express = require('express');
-import socketio = require('socket.io');
+import * as express from 'express';
+import * as socketio from 'socket.io';
 import UserManager from './UserManage';
 import RoomManager from './RoomManage';
 

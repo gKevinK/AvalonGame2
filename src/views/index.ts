@@ -1,23 +1,25 @@
-import VM from './AvalonClient';
+// import Vue from 'vue/types';
+import IGameVM from './IGameVM';
+import VM from 'AvalonClient.vue';
 
 declare var io: SocketIOClientStatic;
-var GameVM: VM;
-// var socket;
+
+// var vm: IGameVM & VM = new VM();
 
 function connect() {
     var socket = io();
-    socket.on('connect', function (data) {
+    socket.on('connect', function (data: string) {
         
         socket.emit('join', { id: '' });
 
         
     });
 
-    socket.on('msg', function (data) {
+    socket.on('msg', function (data: string) {
         console.log(data);
     });
 
-    socket.on('update', function (data) {
-        GameVM.Update(JSON.parse(data));
+    socket.on('update', function (data: string) {
+        
     });
 }

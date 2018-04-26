@@ -1,5 +1,5 @@
 export default interface IGameVM {
-    Start ();
-    Update (operation: object);
-    InitStatus (obj: object);
+    Start (): void;
+    Update (operation: object): void;
+    InitStatus (obj: object): void;
 }
