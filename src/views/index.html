@@ -10,9 +10,8 @@
 </head>
 
 <body id="app">
-  <h1>Hello world.</h1>
 
-  <div id="join-panel">
+  <!-- <div id="join-panel">
     <input type="text" v-model="name">
     <input type="text" v-model="room_id">
     <select v-model.number="player_num">
@@ -27,22 +26,12 @@
     <input type="number" v-model.number="order">
     <button @click="join_new">创建房间</button>
     <button @click="join">加入</button>
-  </div>
+  </div> -->
 
-  <div id="game-panel"></div>
-
-  <div id="msg-panel">
-    <message v-for="msg in messages" :msg="msg"></message>
-  </div>
-
-  <form id="msg-form" @submit.prevent="send">
-    <input type="text" v-model="message" placeholder="Message...">
-    <button type="submit">→</button>
-  </form>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.6/vue.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
-  <script src="/static/js/index.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.min.js"></script> -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.min.js"></script> -->
+  <script src="vendor.js"></script>
+  <script src="index.js"></script>
 </body>
 
 </html>

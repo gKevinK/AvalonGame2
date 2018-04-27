@@ -1,6 +1,6 @@
-// import Vue from 'vue/types';
+import Vue from 'vue';
 import IGameVM from './IGameVM';
-import VM from 'AvalonClient.vue';
+import GameComponent from './AvalonClient.vue';
 
 declare var io: SocketIOClientStatic;
 
@@ -11,8 +11,6 @@ function connect() {
     socket.on('connect', function (data: string) {
         
         socket.emit('join', { id: '' });
-
-        
     });
 
     socket.on('msg', function (data: string) {
@@ -23,3 +21,17 @@ function connect() {
         
     });
 }
+
+Vue.extend({
+    el: "#app",
+    template: `
+    <div>
+        Name: <input v-model="name" type="text">
+        <game-component :name="name" />
+    </div>
+    `,
+    data: { name: "world!" },
+    components: {
+        GameComponent
+    }
+});

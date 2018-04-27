@@ -21,7 +21,7 @@ module.exports = {
             'vue$': 'vue/dist/vue.esm.js'
         },
     },
-
+    externals: [ "vue", "socket.io-client" ],
     module: {
         rules: [
             {
@@ -31,14 +31,19 @@ module.exports = {
             {
                 test: /\.tsx?$/,
                 loader: "ts-loader",
-                // exclude: /node_modules|vue\/src/,
+                exclude: /node_modules/,
                 options: {
                     configFile: "src/views/tsconfig.json",
-                    // appendTsSuffixTo: [ /\.vue$/ ],
+                    appendTsSuffixTo: [ /\.vue$/ ],
                 }
             },
-            { test: /\.css$/,  loader: "css-loader" },
-            { test: /\.json$/, loader: "json-loader" },
+            {
+                test: /\.css$/,
+                loader: "css-loader" },
+            {
+                test: /\.json$/,
+                loader: "json-loader"
+            },
             // { test: /\.html$/, use: "raw-loader" },
         ],
     },

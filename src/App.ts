@@ -6,7 +6,7 @@ import RoomManager from './RoomManage';
 const app = express();
 const server = require('http').createServer(app);
 const io = socketio(server);
-app.use('/static', express.static(__dirname + '/static'));
+app.use(express.static(__dirname + '/static'));
 
 var userm = new UserManager();
 var roomm = new RoomManager();
