@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import IGameVM from './IGameVM';
+import JoinComponent from './JoinComponent.vue';
 import GameComponent from './AvalonComponent.vue';
 
 declare var io: SocketIOClientStatic;
@@ -22,16 +23,28 @@ function connect() {
     });
 }
 
-Vue.extend({
+let app = new Vue({
     el: "#app",
     template: `
     <div>
         Name: <input v-model="name" type="text">
+        <join-component @success="start" />
         <game-component :name="name" />
     </div>
     `,
-    data: { name: "world!" },
+    data: function() { return {
+        name: "world!",
+        status: 1,
+        room_id: 0,
+        users: {},
+    }},
+    methods: {
+        start: function(): void {
+
+        }
+    },
     components: {
-        GameComponent
+        JoinComponent,
+        GameComponent,
     }
 });
