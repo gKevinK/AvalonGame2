@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue/types';
+import Vue from 'vue';
 
 enum ROLE {
     Merlin,
@@ -53,9 +53,9 @@ interface IOperationObject
 }
 
 export default Vue.extend({
-    data: {
+    data: function() { return {
 
-    },
+    } },
 
     methods: {
 

@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import IGameVM from './IGameVM';
-import GameComponent from './AvalonClient.vue';
+import GameComponent from './AvalonComponent.vue';
 
 declare var io: SocketIOClientStatic;
 

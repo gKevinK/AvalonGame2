@@ -3,8 +3,7 @@ const { VueLoaderPlugin } = require('vue-loader');
 
 module.exports = {
     entry: {
-        // main: "./src/App.ts",
-        // "vendor": ["vue", "socket.io-client"],
+        // "vendor": [ "vue", "socket.io-client" ],
         "index": "./src/views/index.ts",
     },
     output: {
@@ -14,14 +13,17 @@ module.exports = {
 
     // Enable sourcemaps for debugging webpack's output.
     devtool: "source-map",
-    target: "node",
+    // target: "node",
     resolve: {
         extensions: [".ts", ".tsx", ".js", ".vue", ".json", ".html"],
         alias: {
             'vue$': 'vue/dist/vue.esm.js'
         },
     },
-    externals: [ "vue", "socket.io-client" ],
+    externals: {
+        // "vue": "Vue",
+        // "socket.io-client": "io",
+    },
     module: {
         rules: [
             {
@@ -33,7 +35,6 @@ module.exports = {
                 loader: "ts-loader",
                 exclude: /node_modules/,
                 options: {
-                    configFile: "src/views/tsconfig.json",
                     appendTsSuffixTo: [ /\.vue$/ ],
                 }
             },
