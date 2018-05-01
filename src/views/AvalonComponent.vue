@@ -1,5 +1,15 @@
 <template>
-    <p>Hello world! - vue component</p>
+    <div>
+        <p>Avalon Game Panel</p>
+        <div v-for="(item, idx) in seats" :key="item.id">
+            <div>Player {{ idx }}</div>
+            <div class="capital"></div>
+            <div id="inteam"></div>
+            <div id="agree"></div>
+            <input type="checkbox" :id="idx" v-model="selections">
+            <input type="radio" name="player_select" :value="idx">
+        </div>
+    </div>
 </template>
 
 <script lang="ts">
@@ -54,7 +64,7 @@ interface IOperationObject
 
 export default Vue.extend({
     data: function() { return {
-
+        seats: new Array(5),
     } },
 
     methods: {

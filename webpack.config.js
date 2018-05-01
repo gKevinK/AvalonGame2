@@ -21,7 +21,7 @@ module.exports = {
         },
     },
     externals: {
-        // "vue": "Vue",
+        "vue": "Vue",
         // "socket.io-client": "io",
     },
     module: {
