@@ -2,6 +2,7 @@ import Vue from 'vue';
 import IGameVM from './IGameVM';
 import JoinComponent from './JoinComponent.vue';
 import GameComponent from './AvalonComponent.vue';
+import { randomBytes } from 'crypto';
 
 declare var io: SocketIOClientStatic;
 
@@ -27,19 +28,23 @@ let app = new Vue({
     el: "#app",
     template: `
     <div>
-        Name: <input v-model="name" type="text">
+        <button @click="">temp</button>
         <join-component @success="start" />
-        <game-component :name="name" />
+        <game-component :op="op" />
     </div>
     `,
     data: function() { return {
-        name: "world!",
+        op: "",
         status: 1,
         room_id: 0,
         users: {},
     }},
     methods: {
         start: function(): void {
+
+        },
+
+        temp: function(): void {
 
         }
     },

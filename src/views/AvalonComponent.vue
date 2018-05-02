@@ -2,12 +2,18 @@
     <div>
         <p>Avalon Game Panel</p>
         <div v-for="(item, idx) in seats" :key="item.id">
-            <div>Player {{ idx }}</div>
-            <div class="capital"></div>
-            <div id="inteam"></div>
-            <div id="agree"></div>
-            <input type="checkbox" :id="idx" v-model="selections">
-            <input type="radio" name="player_select" :value="idx">
+            <div>Player {{ idx }}: {{ item.name }}</div>
+            <div class="capital" v-if="capital == idx">[capital]</div>
+            <div class="inteam" v-if="team.includes(idx)">[in team]</div>
+            <div class="agree">[agree]</div>
+            <div class="disagree">[disagree]</div>
+            <input type="checkbox" v-model="selections" :value="idx">
+            <input type="radio" name="player_select" v-model="selection" :value="idx">
+        </div>
+
+        <div>{{ op }}</div>
+        <div class="panel">
+            <button @click="alert(1)">确定</button>
         </div>
     </div>
 </template>
@@ -63,9 +69,26 @@ interface IOperationObject
 }
 
 export default Vue.extend({
+    props: [ "op" ],
+
     data: function() { return {
-        seats: new Array(5),
+        seats: new Array({}, {}, {}, {}, {}),
+        selection: -1,
+        selections: [],
+        status: STATUS.Wait,
+        capital: 0,
+        team: [0, 2, 3],
+        teamvote: [],
     } },
+
+    watch: {
+        op: function(newOp): void {
+            let opr = <IOperationObject>JSON.parse(newOp);
+            switch (opr.op) {
+                
+            }
+        }
+    },
 
     methods: {
 
