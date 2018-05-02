@@ -5,14 +5,17 @@
             <div>Player {{ idx }}: {{ item.name }}</div>
             <div class="capital" v-if="capital == idx">[capital]</div>
             <div class="inteam" v-if="team.includes(idx)">[in team]</div>
-            <div class="agree">[agree]</div>
-            <div class="disagree">[disagree]</div>
-            <input type="checkbox" v-model="selections" :value="idx">
-            <input type="radio" name="player_select" v-model="selection" :value="idx">
+            <div class="agree" v-if="false">[agree]</div>
+            <div class="disagree" v-if="false">[disagree]</div>
+            <input type="checkbox" v-if="status == STATUS.MakeTeam && capital == idx"
+                v-model="selections" :value="idx">
+            <input type="radio" v-if="false" name="player_select" v-model="selection" :value="idx">
         </div>
 
         <div>{{ op }}</div>
-        <div class="panel">
+        <div class="panel" v-if="[ STATUS.TeamVote, STATUS.TaskVote ].includes(status)">
+            <input type="radio" v-model="selection" :value="1">
+            <input type="radio" v-model="selection" :value="0">
             <button @click="alert(1)">确定</button>
         </div>
     </div>
@@ -22,6 +25,9 @@
 import Vue from 'vue';
 
 enum ROLE {
+    Good = -3,
+    Bad = -2,
+    Unknown = -1,
     Merlin,
     Percival,
     Loyalist,
@@ -72,20 +78,55 @@ export default Vue.extend({
     props: [ "op" ],
 
     data: function() { return {
-        seats: new Array({}, {}, {}, {}, {}),
+        seats: new Array({}, {}),
+        round: -1,
+        try: -1,
         selection: -1,
         selections: [],
-        status: STATUS.Wait,
+        status: STATUS.MakeTeam,
         capital: 0,
-        team: [0, 2, 3],
+        team: [],
         teamvote: [],
+        taskvote: [],
     } },
 
     watch: {
         op: function(newOp): void {
             let opr = <IOperationObject>JSON.parse(newOp);
             switch (opr.op) {
-                
+                case "make-team":
+                    this.status = STATUS.MakeTeam;
+                    this.capital = opr.t;
+                    break;
+                case "team-vote":
+                    this.status = STATUS.TeamVote;
+                    this.team = opr.ts;
+                    // TODO
+                    break;
+                case "team-vote-i":
+                    (this.teamvote as Array<Number>).splice(opr.t, 1, -2);
+                    break;
+                case "team-vote-res":
+                    // TODO
+                    break;
+                case "task-vote":
+                    this.status = STATUS.TaskVote;
+                    this.tas
+                    // TODO
+                    break;
+                case "task-vote-i":
+                    (this.taskvote as Array<Number>).splice(opr.t, 1, -2);
+                    break;
+                case "task-vote-res":
+                    // TODO
+                    break;
+                case "assassin":
+                    this.status = STATUS.Assassin;
+                    // TODO
+                    break;
+                case "end":
+                    // TODO
+                    break;
             }
         }
     },
