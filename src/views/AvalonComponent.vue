@@ -5,15 +5,22 @@
             <div>Player {{ idx }}: {{ item.name }}</div>
             <div class="capital" v-if="capital == idx">[capital]</div>
             <div class="inteam" v-if="team.includes(idx)">[in team]</div>
+            <div class="voted" v-if="false">[voted]</div>
             <div class="agree" v-if="false">[agree]</div>
             <div class="disagree" v-if="false">[disagree]</div>
-            <input type="checkbox" v-if="status == STATUS.MakeTeam && capital == idx"
+            <input type="checkbox" v-if="status == 1 && capital == idx"
                 v-model="selections" :value="idx">
             <input type="radio" v-if="false" name="player_select" v-model="selection" :value="idx">
         </div>
 
         <div>{{ op }}</div>
-        <div class="panel" v-if="[ STATUS.TeamVote, STATUS.TaskVote ].includes(status)">
+        <div class="record">
+            <div v-for="(item, idx) in result" :key="item.id">
+
+            </div>
+            <span
+        </div>
+        <div class="panel" v-if="[ 2, 3 ].includes(status)">
             <input type="radio" v-model="selection" :value="1">
             <input type="radio" v-model="selection" :value="0">
             <button @click="alert(1)">确定</button>
@@ -79,15 +86,17 @@ export default Vue.extend({
 
     data: function() { return {
         seats: new Array({}, {}),
+        pcount: 5,
         round: -1,
         try: -1,
         selection: -1,
         selections: [],
         status: STATUS.MakeTeam,
         capital: 0,
-        team: [],
-        teamvote: [],
-        taskvote: [],
+        team: <Number[]> [],
+        teamvote: <Number[]> [],
+        taskvote: <Number[]> [],
+        result: [ -1, -1, -1, -1, -1 ],
     } },
 
     watch: {
@@ -111,7 +120,7 @@ export default Vue.extend({
                     break;
                 case "task-vote":
                     this.status = STATUS.TaskVote;
-                    this.tas
+                    this.taskvote = opr.ts;
                     // TODO
                     break;
                 case "task-vote-i":
