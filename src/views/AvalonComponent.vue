@@ -16,9 +16,11 @@
         <div>{{ op }}</div>
         <div class="record">
             <div v-for="(item, idx) in result" :key="item.id">
-
+                {{ idx + 1 }}: {{ task_player_num[idx] }} : {{ ["-", "fail", "success"][item + 1] }}
             </div>
-            <span
+            <div v-for="tn in [ 1, 2, 3, 4, 5 ]" :key="tn.id">
+                {{ tn }}
+            </div>
         </div>
         <div class="panel" v-if="[ 2, 3 ].includes(status)">
             <input type="radio" v-model="selection" :value="1">
@@ -56,7 +58,7 @@ enum STATUS {
 }
 
 const config = {
-    role: {
+    role: <{ [index:number]: Number[] }>{
         5:  [0, 1, 2, 3, 4],
         6:  [0, 1, 2, 2, 3, 4],
         7:  [0, 1, 2, 2, 3, 4, 6],
@@ -64,7 +66,7 @@ const config = {
         9:  [0, 1, 2, 2, 2, 2, 3, 4, 5],
         10: [0, 1, 2, 2, 2, 2, 3, 4, 5, 6],
     },
-    task_player_num: {
+    task_player_num: <{ [index:number]: Number[] }>{
         5:  [2, 3, 2, 3, 3],
         6:  [2, 3, 4, 3, 4],
         7:  [2, 3, 3, 4, 4],
@@ -100,8 +102,8 @@ export default Vue.extend({
     } },
 
     watch: {
-        op: function(newOp): void {
-            let opr = <IOperationObject>JSON.parse(newOp);
+        op: function(opr): void {
+            // let opr = <IOperationObject>JSON.parse(newOp);
             switch (opr.op) {
                 case "make-team":
                     this.status = STATUS.MakeTeam;
@@ -145,7 +147,9 @@ export default Vue.extend({
     },
 
     computed: {
-
+        task_player_num: function(): Number[] {
+            return config.task_player_num[this.pcount];
+        }
     },
 });
 
