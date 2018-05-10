@@ -29,7 +29,7 @@ let app = new Vue({
     template: `
     <div>
         <button @click="">temp</button>
-        <join-component @success="start" />
+        <join-component @join="join" @join_new="join_new" />
         <game-component :op="op" />
     </div>
     `,
@@ -40,6 +40,13 @@ let app = new Vue({
         users: {},
     }},
     methods: {
+        join_new: function(data: object): void {
+
+        },
+        join: function(data: object): void {
+            
+        },
+
         start: function(): void {
 
         },

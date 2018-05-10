@@ -1,8 +1,8 @@
 <template>
     <div>
-        <p>Join game</p>
-        <input type="text" v-model="name">
-        <input type="text" v-model="room_id">
+        <p>Join game panel</p>
+        <input type="text" v-model="name" placeholder="昵称">
+        <input type="text" v-model="room_id" placeholder="房间号">
         <select v-model.number="player_num">
             <option>5</option>
             <option>6</option>
@@ -29,8 +29,12 @@ export default Vue.extend({
         order: 0,
     }},
     methods: {
-        join_new: function() { },
-        join: function() { },
+        join_new: function(): void {
+            this.$emit("join_new", this.data);
+        },
+        join: function(): void {
+            this.$emit("join", this.data);
+        },
     }
 });
 </script>
