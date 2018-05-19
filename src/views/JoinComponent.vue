@@ -30,10 +30,20 @@ export default Vue.extend({
     }},
     methods: {
         join_new: function(): void {
-            this.$emit("join_new", this.data);
+            this.$emit("join_new", {
+                name: this.name,
+                player_num: this.player_num,
+                random_order: this.random_order,
+                order: this.random_order ? -1 : this.order - 1,
+            });
         },
+
         join: function(): void {
-            this.$emit("join", this.data);
+            this.$emit("join", {
+                name: this.name,
+                room_id: this.room_id,
+                order: this.random_order ? -1 : this.order - 1,
+            });
         },
     }
 });

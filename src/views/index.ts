@@ -8,22 +8,6 @@ declare var io: SocketIOClientStatic;
 
 // var vm: IGameVM & VM = new VM();
 
-function connect() {
-    var socket = io();
-    socket.on('connect', function (data: string) {
-        
-        socket.emit('join', { id: '' });
-    });
-
-    socket.on('msg', function (data: string) {
-        console.log(data);
-    });
-
-    socket.on('update', function (data: string) {
-        
-    });
-}
-
 let app = new Vue({
     el: "#app",
     template: `
@@ -43,6 +27,7 @@ let app = new Vue({
         join_new: function(data: object): void {
 
         },
+
         join: function(data: object): void {
             
         },
@@ -51,12 +36,33 @@ let app = new Vue({
 
         },
 
-        temp: function(): void {
+        operate: function(data: object): void {
 
-        }
+        },
+
+        message: function (data: string): void {
+            socket.emit('msg', data);
+        },
     },
     components: {
         JoinComponent,
         GameComponent,
     }
+});
+
+let socket = io();
+socket.on('connect', function (data: string) {
+    console.log(data);
+});
+
+socket.on('join', function (data: string) {
+    console.log(data);
+});
+
+socket.on('msg', function (data: string) {
+    console.log(data);
+});
+
+socket.on('update', function (data: string) {
+    console.log(data);
 });
