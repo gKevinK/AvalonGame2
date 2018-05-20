@@ -13,27 +13,31 @@ const Util = {
 
 class Seat
 {
-    msgs: String[] = [];
-    NotifyCallback: (msg: String) => void;
+    private msgs: object[] = [];
+    private NotifyCallback: (type: string, msg: object) => void;
 
-    sit (callback: (msg: String) => void): void {
+    sit (callback: (type: string, msg: object) => void): void {
         this.NotifyCallback = callback;
         this.msgs.forEach(m => {
-            this.NotifyCallback(m);
+            this.NotifyCallback('msg', m);
         });
     }
 
-    chat (msg: object): void {
-        let m = JSON.stringify(msg);
-        this.msgs.push(m);
-        this.NotifyCallback(m);
+    empty (): boolean {
+        return this.NotifyCallback === null;
     }
 
-    notify (msg: object): void {
-        this.NotifyCallback(JSON.stringify(msg));
+    message (msg: { order: number, text: string }): void {
+        this.msgs.push(msg);
+        this.NotifyCallback('msg', msg);
+    }
+
+    notify (type: string, msg: object): void {
+        this.NotifyCallback(type, msg);
     }
 
     leave (): void {
+        this.NotifyCallback('exit', null);
         this.NotifyCallback = null;
     }
 }
@@ -62,51 +66,72 @@ export class Room
             ids = new Array(this.num).map((v, i) => i);
         }
         ids.forEach(i => {
-            this.seats[i].notify(obj);
+            this.seats[i].notify('update', obj);
         });
     }
 
-    join () : boolean {
-        return false;
+    join (n: number, name: string, callback: (type: string, msg: object) => void) : void {
+        let seat = this.seats[n];
+        seat.sit(callback);
+        seat.notify('join', { room_id: this.id, order: n });
+        seat.notify('status', this.machine.GetStatus(n));
     }
 
-    operate (op: string) : boolean {
-        return this.machine.Operate(0, JSON.parse(op));
+    operate (n: number, op: string) : boolean {
+        return this.machine.Operate(n, JSON.parse(op));
     }
 
-    message (msg: string) : void {
-
+    message (n: number, msg: string) : void {
+        this.seats.forEach(s => s.message({ order: n, text: msg }));
     }
 
-    exit () : void {
-        
+    exit (n: number) : void {
+        this.seats.forEach(s => s.notify('exit-i', { type: 'exit-i', order: n }));
+        this.seats[n].leave();
     }
 }
 
 export default class RoomManager
 {
-    rooms: Map<string, Room>;
+    private rooms: Map<string, Room>;
 
     constructor() {
         this.rooms = new Map<string, Room>();
     }
 
     GetRoom (id: string) : Room {
-        return this.rooms[id];
+        return this.rooms.get(id);
     }
 
-    JoinNew (player_num: number, order: number) : boolean {
+    JoinNew (player_num: number, order: number, name: string, callback: (type: string, msg: object) => void) : boolean {
         let id = this.getId();
-        // this.rooms[id] = new Room(id, );
+        this.rooms[id] = new Room(id, player_num);
+        console.log('+ Room ' + id + ' created.');
+        let r = this.Join(id, order, name, callback);
+        if (r == false) {
+            this.rooms.delete(id);
+            return false;
+        }
         return true;
     }
 
-    Join (id: string) : boolean {
-        return false;
+    Join (id: string, order: number, name: string, callback: (type: string, msg: object) => void) : boolean {
+        if (! this.rooms.has(id)) return false;
+        let room = this.GetRoom(id);
+        if (order == -1) {
+            room.seats.filter(s => s.empty())
+        }
+        if (name.length < 4 || order >= room.num || !room.seats[order].empty()) return false;
+        return true;
     }
 
-    Exit (id: string) : void {
-
+    Exit (id: string, order: number) : void {
+        if (! this.rooms.has(id)) return;
+        this.GetRoom(id).exit(order);
+        if (this.GetRoom(id).seats.every(s => s.empty())) {
+            this.rooms.delete(id);
+            console.log('- Room ' + id + ' destroyed.');
+        }
     }
 
     private getId(): string {

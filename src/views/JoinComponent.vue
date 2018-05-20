@@ -33,7 +33,6 @@ export default Vue.extend({
             this.$emit("join_new", {
                 name: this.name,
                 player_num: this.player_num,
-                random_order: this.random_order,
                 order: this.random_order ? -1 : this.order - 1,
             });
         },

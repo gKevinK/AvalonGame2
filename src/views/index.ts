@@ -14,30 +14,31 @@ let app = new Vue({
     <div>
         <button @click="">temp</button>
         <join-component @join="join" @join_new="join_new" />
-        <game-component :op="op" />
+        <game-component :op="op" :msg="msg" />
     </div>
     `,
     data: function() { return {
         op: "",
+        msg: {},
         status: 1,
         room_id: 0,
         users: {},
     }},
     methods: {
         join_new: function(data: object): void {
-
+            socket.emit('join-new', JSON.stringify(data));
         },
 
         join: function(data: object): void {
-            
+            socket.emit('join', JSON.stringify(data));
         },
 
-        start: function(): void {
+        prepare: function(): void {
 
         },
 
         operate: function(data: object): void {
-
+            socket.emit('operate', JSON.stringify(data));
         },
 
         message: function (data: string): void {
@@ -51,8 +52,8 @@ let app = new Vue({
 });
 
 let socket = io();
-socket.on('connect', function (data: string) {
-    console.log(data);
+socket.on('connect', function () {
+    console.log('Connection established.');
 });
 
 socket.on('join', function (data: string) {
@@ -60,9 +61,9 @@ socket.on('join', function (data: string) {
 });
 
 socket.on('msg', function (data: string) {
-    console.log(data);
+    app.msg = JSON.parse(data);
 });
 
 socket.on('update', function (data: string) {
-    console.log(data);
+    app.op = JSON.parse(data);
 });

@@ -18,21 +18,42 @@ app.get('/', function (req, res) {
 
 io.on('connection', function (socket) {
 
-    let user_id = undefined;
+    let room_id: string = null;
+    let order: number = null;
+
+    let callback: (t: string, o: any) => void = (t, o) => {
+        switch (t) {
+            case 'exit':
+                room_id = null;
+                order = null;
+                break;
+            case 'join':
+                room_id = o.room_id;
+                order = o.order;
+                break;
+        }
+        socket.emit(t, JSON.stringify(o));
+    };
 
     socket.on('join-new', function (data: string) {
         let obj = JSON.parse(data);
-        // obj.name;
+        let r = roomm.JoinNew(obj.player_num, obj.order, obj.name, callback);
+        if (r == false) {
+            socket.emit('error');
+        }
     });
 
     socket.on('join', function (data) {
-        if (user_id === undefined) return;
-
+        let obj = JSON.parse(data);
+        let r = roomm.Join(obj.player_num, obj.order, obj.name, callback);
+        if (r == false) {
+            socket.emit('error');
+        }
     });
 
-    socket.on('reconn', function (data) {
-        // TODO
-    });
+    // socket.on('reconn', function (data) {
+    //     // TODO
+    // });
 
     socket.on('operate', function (data: string) {
         

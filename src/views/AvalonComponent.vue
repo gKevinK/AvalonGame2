@@ -27,6 +27,12 @@
             <input type="radio" v-model="selection" :value="0">
             <button @click="alert(1)">确定</button>
         </div>
+
+        <div>
+            <div v-for="m in messages" :key="m.id">
+                Player {{ m.order + 1 }} : {{ m.text }}
+            </div>
+        </div>
     </div>
 </template>
 
@@ -84,7 +90,7 @@ interface IOperationObject
 }
 
 export default Vue.extend({
-    props: [ "op" ],
+    props: [ "op", "msg" ],
 
     data: function() { return {
         seats: new Array({}, {}),
@@ -99,11 +105,11 @@ export default Vue.extend({
         teamvote: <Number[]> [],
         taskvote: <Number[]> [],
         result: [ -1, -1, -1, -1, -1 ],
+        messages: <any[]> [],
     } },
 
     watch: {
-        op: function(opr): void {
-            // let opr = <IOperationObject>JSON.parse(newOp);
+        op: function (opr): void {
             switch (opr.op) {
                 case "make-team":
                     this.status = STATUS.MakeTeam;
@@ -139,7 +145,11 @@ export default Vue.extend({
                     // TODO
                     break;
             }
-        }
+        },
+
+        msg: function (m: any): void {
+            this.messages.push(m);
+        },
     },
 
     methods: {
