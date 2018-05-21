@@ -45,7 +45,7 @@ io.on('connection', function (socket) {
 
     socket.on('join', function (data) {
         let obj = JSON.parse(data);
-        let r = roomm.Join(obj.player_num, obj.order, obj.name, callback);
+        let r = roomm.Join(obj.room_id, obj.order, obj.name, callback);
         if (r == false) {
             socket.emit('err');
         }
@@ -56,15 +56,18 @@ io.on('connection', function (socket) {
     // });
 
     socket.on('operate', function (data: string) {
-        
+        if (room_id == null || roomm.GetRoom(room_id) == undefined) return;
+        roomm.GetRoom(room_id).operate(order, data);
     });
 
     socket.on('msg', function (data) {
-
+        if (room_id == null || roomm.GetRoom(room_id) == undefined) return;
+        roomm.GetRoom(room_id).message(order, data);
     });
 
     socket.on('disconnect', function () {
-
+        if (room_id != null)
+            roomm.Exit(room_id, order);
     });
 });
 

@@ -74,7 +74,10 @@ export class Room
         let seat = this.seats[n];
         seat.sit(callback);
         seat.notify('join', { room_id: this.id, order: n });
-        seat.notify('status', this.machine.GetStatus(n));
+        if (this.machine)
+            seat.notify('status', this.machine.GetStatus(n));
+        if (! this.machine && this.seats.every(s => !s.empty()))
+            this.start();
     }
 
     operate (n: number, op: string) : boolean {
