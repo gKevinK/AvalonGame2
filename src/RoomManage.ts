@@ -14,7 +14,7 @@ const Util = {
 class Seat
 {
     private msgs: object[] = [];
-    private NotifyCallback: (type: string, msg: object) => void;
+    private NotifyCallback: (type: string, msg: object) => void = null;
 
     sit (callback: (type: string, msg: object) => void): void {
         this.NotifyCallback = callback;
@@ -52,7 +52,7 @@ export class Room
     constructor (id: string, num: number) {
         this.id = id;
         this.num = num;
-        this.seats = new Array(num).map(() => new Seat());
+        this.seats = Util.range(num).map(_ => new Seat());
     }
 
     private start () {
@@ -105,7 +105,7 @@ export default class RoomManager
 
     JoinNew (player_num: number, order: number, name: string, callback: (type: string, msg: object) => void) : boolean {
         let id = this.getId();
-        this.rooms[id] = new Room(id, player_num);
+        this.rooms.set(id, new Room(id, player_num));
         console.log('+ Room ' + id + ' created.');
         let r = this.Join(id, order, name, callback);
         if (r == false) {
@@ -119,9 +119,12 @@ export default class RoomManager
         if (! this.rooms.has(id)) return false;
         let room = this.GetRoom(id);
         if (order == -1) {
-            room.seats.filter(s => s.empty())
+            let ss = room.seats.filter(s => s.empty());
+            if (ss.length == 0) return false;
+            order = ss.indexOf(ss[Util.randomIn(ss.length)]);
         }
         if (name.length < 4 || order >= room.num || !room.seats[order].empty()) return false;
+        room.join(order, name, callback);
         return true;
     }
 

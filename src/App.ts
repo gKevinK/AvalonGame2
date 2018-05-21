@@ -39,7 +39,7 @@ io.on('connection', function (socket) {
         let obj = JSON.parse(data);
         let r = roomm.JoinNew(obj.player_num, obj.order, obj.name, callback);
         if (r == false) {
-            socket.emit('error');
+            socket.emit('err');
         }
     });
 
@@ -47,7 +47,7 @@ io.on('connection', function (socket) {
         let obj = JSON.parse(data);
         let r = roomm.Join(obj.player_num, obj.order, obj.name, callback);
         if (r == false) {
-            socket.emit('error');
+            socket.emit('err');
         }
     });
 
