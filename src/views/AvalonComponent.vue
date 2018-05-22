@@ -22,6 +22,7 @@
                 {{ tn }}
             </div>
         </div>
+
         <div class="panel" v-if="[ 2, 3 ].includes(status)">
             <input type="radio" v-model="selection" :value="1">
             <input type="radio" v-model="selection" :value="0">
@@ -93,12 +94,14 @@ export default Vue.extend({
     props: [ "op", "msg" ],
 
     data: function() { return {
-        seats: new Array({}, {}),
+        seats: new Array<{ name: string }>(5),
         pcount: 5,
         round: -1,
         try: -1,
+        role: ROLE.Unknown,
+        knowledge: <Number[]> [],
         selection: -1,
-        selections: [],
+        selections: <Number[]> [],
         status: STATUS.MakeTeam,
         capital: 0,
         team: <Number[]> [],
@@ -110,14 +113,28 @@ export default Vue.extend({
 
     watch: {
         op: function (opr): void {
-            switch (opr.op) {
+            switch (opr.type) {
+                case "status":
+                    this.seats = (<string[]>opr.names).map(n => <{ name: string }>{ name: n });
+                    this.pcount = opr.status.pcount;
+                    this.status = opr.status.status;
+                    this.role = opr.status.role;
+                    this.knowledge = opr.status.knowledge;
+                    this.result = opr.status.result;
+                    this.round = opr.status.round;
+                    this.try = opr.status.try;
+                    this.capital = opr.status.capital;
+                    this.team = opr.status.team;
+                    break;
                 case "make-team":
                     this.status = STATUS.MakeTeam;
                     this.capital = opr.t;
+                    this.selections = [];
                     break;
                 case "team-vote":
                     this.status = STATUS.TeamVote;
                     this.team = opr.ts;
+                    this.selection = -1;
                     // TODO
                     break;
                 case "team-vote-i":
@@ -129,6 +146,7 @@ export default Vue.extend({
                 case "task-vote":
                     this.status = STATUS.TaskVote;
                     this.taskvote = opr.ts;
+                    this.selection = -1;
                     // TODO
                     break;
                 case "task-vote-i":
@@ -139,6 +157,7 @@ export default Vue.extend({
                     break;
                 case "assassin":
                     this.status = STATUS.Assassin;
+                    this.selections = [];
                     // TODO
                     break;
                 case "end":

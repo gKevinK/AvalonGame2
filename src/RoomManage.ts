@@ -13,10 +13,12 @@ const Util = {
 
 class Seat
 {
+    name: string = undefined;
     private msgs: object[] = [];
-    private NotifyCallback: (type: string, msg: object) => void = null;
+    private NotifyCallback: (type: string, msg: object) => void = undefined;
 
-    sit (callback: (type: string, msg: object) => void): void {
+    sit (name: string, callback: (type: string, msg: object) => void): void {
+        this.name = name;
         this.NotifyCallback = callback;
         this.msgs.forEach(m => {
             this.NotifyCallback('msg', m);
@@ -24,7 +26,7 @@ class Seat
     }
 
     empty (): boolean {
-        return this.NotifyCallback === null;
+        return this.NotifyCallback === undefined;
     }
 
     message (msg: { order: number, text: string }): void {
@@ -33,12 +35,13 @@ class Seat
     }
 
     notify (type: string, msg: object): void {
-        this.NotifyCallback(type, msg);
+        if (this.NotifyCallback)
+            this.NotifyCallback(type, msg);
     }
 
     leave (): void {
-        this.NotifyCallback('exit', null);
-        this.NotifyCallback = null;
+        this.NotifyCallback('exit', undefined);
+        this.NotifyCallback = undefined;
     }
 }
 
@@ -63,7 +66,7 @@ export class Room
 
     private notify (ids: Array<number>, obj: object) : void {
         if (ids.length == 0) {
-            ids = new Array(this.num).map((v, i) => i);
+            ids = Util.range(this.num).map((v, i) => i);
         }
         ids.forEach(i => {
             this.seats[i].notify('update', obj);
@@ -72,10 +75,11 @@ export class Room
 
     join (n: number, name: string, callback: (type: string, msg: object) => void) : void {
         let seat = this.seats[n];
-        seat.sit(callback);
+        seat.sit(name, callback);
         seat.notify('join', { room_id: this.id, order: n });
+        this.seats.forEach(s => s.notify('room', { type: 'join-i', order: n, name: name }));
         if (this.machine)
-            seat.notify('status', this.machine.GetStatus(n));
+            seat.notify('op', { type: 'status', names: this.seats.map(s => s.name), status: this.machine.GetStatus(n) });
         if (! this.machine && this.seats.every(s => !s.empty()))
             this.start();
     }
@@ -89,7 +93,7 @@ export class Room
     }
 
     exit (n: number) : void {
-        this.seats.forEach(s => s.notify('exit-i', { type: 'exit-i', order: n }));
+        this.seats.forEach(s => s.notify('room', { type: 'exit-i', order: n }));
         this.seats[n].leave();
     }
 }
@@ -128,7 +132,13 @@ export default class RoomManager
         }
         if (name.length < 4 || order >= room.num || !room.seats[order].empty()) return false;
         room.join(order, name, callback);
+        console.log('  Room ' + room.id + ' has new user ' + name + '.');
         return true;
+    }
+
+    GetStatus (id: string, order: number) : object {
+        // TODO
+        return undefined;
     }
 
     Exit (id: string, order: number) : void {

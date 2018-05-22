@@ -18,14 +18,14 @@ app.get('/', function (req, res) {
 
 io.on('connection', function (socket) {
 
-    let room_id: string = null;
-    let order: number = null;
+    let room_id: string = undefined;
+    let order: number = undefined;
 
     let callback: (t: string, o: any) => void = (t, o) => {
         switch (t) {
             case 'exit':
-                room_id = null;
-                order = null;
+                room_id = undefined;
+                order = undefined;
                 break;
             case 'join':
                 room_id = o.room_id;
@@ -56,17 +56,17 @@ io.on('connection', function (socket) {
     // });
 
     socket.on('operate', function (data: string) {
-        if (room_id == null || roomm.GetRoom(room_id) == undefined) return;
+        if (room_id == undefined || roomm.GetRoom(room_id) == undefined) return;
         roomm.GetRoom(room_id).operate(order, data);
     });
 
     socket.on('msg', function (data) {
-        if (room_id == null || roomm.GetRoom(room_id) == undefined) return;
+        if (room_id == undefined || roomm.GetRoom(room_id) == undefined) return;
         roomm.GetRoom(room_id).message(order, data);
     });
 
     socket.on('disconnect', function () {
-        if (room_id != null)
+        if (room_id != undefined)
             roomm.Exit(room_id, order);
     });
 });

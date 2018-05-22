@@ -12,7 +12,6 @@ let app = new Vue({
     el: "#app",
     template: `
     <div>
-        <button @click="">temp</button>
         <join-component @join="join" @join_new="join_new" />
         <game-component :op="op" :msg="msg" />
     </div>
@@ -20,8 +19,8 @@ let app = new Vue({
     data: function() { return {
         op: "",
         msg: {},
-        status: 1,
-        room_id: 0,
+        // status: 1,
+        room_id: undefined,
         users: {},
     }},
     methods: {
@@ -34,7 +33,7 @@ let app = new Vue({
         },
 
         prepare: function(): void {
-
+            // TODO
         },
 
         operate: function(data: object): void {
@@ -62,6 +61,10 @@ socket.on('join', function (data: string) {
 
 socket.on('msg', function (data: string) {
     app.msg = JSON.parse(data);
+});
+
+socket.on('room', function (data: string) {
+    app.op = JSON.parse(data);
 });
 
 socket.on('update', function (data: string) {
