@@ -128,7 +128,7 @@ export default class RoomManager
         if (order == -1) {
             let ss = room.seats.filter(s => s.empty());
             if (ss.length == 0) return false;
-            order = ss.indexOf(ss[Util.randomIn(ss.length)]);
+            order = room.seats.indexOf(ss[Util.randomIn(ss.length)]);
         }
         if (name.length < 4 || order >= room.num || !room.seats[order].empty()) return false;
         room.join(order, name, callback);
