@@ -88,6 +88,8 @@ export class Room
         return this.machine.Operate(n, JSON.parse(op));
     }
 
+    
+
     message (n: number, msg: string) : void {
         this.seats.forEach(s => s.message({ order: n, text: msg }));
     }
@@ -138,7 +140,12 @@ export default class RoomManager
 
     GetStatus (id: string, order: number) : object {
         // TODO
-        return undefined;
+        return {
+            room_id: id,
+            order: order,
+            room_info: null,
+            game_info: null,
+        };
     }
 
     Exit (id: string, order: number) : void {
@@ -151,9 +158,11 @@ export default class RoomManager
     }
 
     private getId(): string {
-        // TODO: Dynamic range
+        var range = 100;
+        while (this.rooms.size > range * 0.6)
+            range *= 10;
         while (true) {
-            let k = Math.floor(Math.random() * 10000).toString();
+            let k = Math.floor((Math.random() * 0.9 + 0.1) * range).toString();
             if (! this.rooms.has(k)) {
                 return k;
             }
