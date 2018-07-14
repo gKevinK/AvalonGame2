@@ -70,3 +70,7 @@ socket.on('room', function (data: string) {
 socket.on('update', function (data: string) {
     app.op = JSON.parse(data);
 });
+
+socket.on('disconnect', function () {
+    console.log('Connection closed.');
+});

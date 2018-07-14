@@ -51,9 +51,9 @@ io.on('connection', function (socket) {
         }
     });
 
-    // socket.on('reconn', function (data) {
-    //     // TODO
-    // });
+    socket.on('get-status', function (data) {
+        // TODO
+    });
 
     socket.on('operate', function (data: string) {
         if (room_id == undefined || roomm.GetRoom(room_id) == undefined) return;
