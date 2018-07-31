@@ -53,6 +53,9 @@ let app = new Vue({
 let socket = io();
 socket.on('connect', function () {
     console.log('Connection established.');
+    if (localStorage.getItem('user-id') != null) {
+        socket.emit('get-status', localStorage.getItem('user-id'));
+    }
 });
 
 socket.on('join', function (data: string) {

@@ -159,7 +159,7 @@ export default class RoomManager
 
     private getId(): string {
         var range = 100;
-        while (this.rooms.size > range * 0.6)
+        while (this.rooms.size > range * 0.2)
             range *= 10;
         while (true) {
             let k = Math.floor((Math.random() * 0.9 + 0.1) * range).toString();
