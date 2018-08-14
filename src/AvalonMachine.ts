@@ -75,7 +75,7 @@ export default class AvalonMachine implements IGameMachine
 
     round: number;
     try: number;
-    capital: number;
+    captain: number;
     team: Array<number> = [];
     teamvote: Array<number> = [];
     taskvote: Array<number> = [];
@@ -122,8 +122,8 @@ export default class AvalonMachine implements IGameMachine
             this.NotifyCallback([i], { type: 'knowledge', role: r, knowledge: this.knowledge(i) });
         });
 
-        this.capital = randomInt(this.pcount);
-        this.NotifyCallback([], { type: 'make-team', capital: this.capital,
+        this.captain = randomInt(this.pcount);
+        this.NotifyCallback([], { type: 'make-team', captain: this.captain,
                                   round: this.round, try: this.try });
         this.status = STATUS.MakeTeam;
     }
@@ -173,7 +173,7 @@ export default class AvalonMachine implements IGameMachine
             } else {
                 this.try += 1;
                 this.status = STATUS.MakeTeam;
-                this.NotifyCallback([], { type: 'make-team', capital: this.capital,
+                this.NotifyCallback([], { type: 'make-team', captain: this.captain,
                                           round: this.round, try: this.try });
             }
         }
@@ -209,7 +209,7 @@ export default class AvalonMachine implements IGameMachine
             this.round += 1;
             this.try = 1;
             this.status = STATUS.MakeTeam;
-            this.NotifyCallback([], { type: 'make-team', player: this.capital,
+            this.NotifyCallback([], { type: 'make-team', player: this.captain,
                                       round: this.round, try: this.try });
         }
     }
@@ -231,7 +231,7 @@ export default class AvalonMachine implements IGameMachine
             result: this.result,
             round: this.round,
             try: this.try,
-            capital: this.capital,
+            captain: this.captain,
             team: this.team,
         };
     }

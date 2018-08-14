@@ -3,12 +3,12 @@
         <p>Avalon Game Panel</p>
         <div v-for="(item, idx) in seats" :key="item.id">
             <div>Player {{ idx }}: {{ item.name }}</div>
-            <div class="capital" v-if="capital == idx">[capital]</div>
+            <div class="captain" v-if="captain == idx">[captain]</div>
             <div class="inteam" v-if="team.includes(idx)">[in team]</div>
             <div class="voted" v-if="false">[voted]</div>
             <div class="agree" v-if="false">[agree]</div>
             <div class="disagree" v-if="false">[disagree]</div>
-            <input type="checkbox" v-if="status == 1 && capital == idx"
+            <input type="checkbox" v-if="status == 1 && captain == idx"
                 v-model="selections" :value="idx">
             <input type="radio" v-if="false" name="player_select" v-model="selection" :value="idx">
         </div>
@@ -26,6 +26,10 @@
         <div class="panel" v-if="[ 2, 3 ].includes(status)">
             <input type="radio" v-model="selection" :value="1">
             <input type="radio" v-model="selection" :value="0">
+            <button @click="alert(1)">确定</button>
+        </div>
+
+        <div class="panel" v-if="captain == myseat && status == 1">
             <button @click="alert(1)">确定</button>
         </div>
 
@@ -98,12 +102,13 @@ export default Vue.extend({
         pcount: 5,
         round: -1,
         try: -1,
+        myseat: -1,
         role: ROLE.Unknown,
         knowledge: <Number[]> [],
         selection: -1,
         selections: <Number[]> [],
         status: STATUS.MakeTeam,
-        capital: 0,
+        captain: 0,
         team: <Number[]> [],
         teamvote: <Number[]> [],
         taskvote: <Number[]> [],
@@ -123,12 +128,12 @@ export default Vue.extend({
                     this.result = opr.status.result;
                     this.round = opr.status.round;
                     this.try = opr.status.try;
-                    this.capital = opr.status.capital;
+                    this.captain = opr.status.captain;
                     this.team = opr.status.team;
                     break;
                 case "make-team":
                     this.status = STATUS.MakeTeam;
-                    this.capital = opr.t;
+                    this.captain = opr.t;
                     this.selections = [];
                     break;
                 case "team-vote":
