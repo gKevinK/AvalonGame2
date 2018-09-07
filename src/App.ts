@@ -1,7 +1,7 @@
 import * as express from 'express';
 import * as socketio from 'socket.io';
-import UserManager from './UserManage';
-import RoomManager from './RoomManage';
+import UserManager from './server/UserManage';
+import RoomManager from './server/RoomManage';
 
 const app = express();
 const server = require('http').createServer(app);
@@ -18,37 +18,22 @@ app.get('/', function (req, res) {
 
 io.on('connection', function (socket) {
 
-    let room_id: string = undefined;
-    let order: number = undefined;
-
-    let callback: (t: string, o: any) => void = (t, o) => {
-        switch (t) {
-            case 'exit':
-                room_id = undefined;
-                order = undefined;
-                break;
-            case 'join':
-                room_id = o.room_id;
-                order = o.order;
-                break;
-        }
-        socket.emit(t, JSON.stringify(o));
-    };
+    let userid: string = undefined;
 
     socket.on('join-new', function (data: string) {
         let obj = JSON.parse(data);
-        let r = roomm.JoinNew(obj.player_num, obj.order, obj.name, callback);
-        if (r == false) {
-            socket.emit('err');
-        }
+        // let r = roomm.JoinNew();
+        // if (r == false) {
+        //     socket.emit('err');
+        // }
     });
 
     socket.on('join', function (data) {
         let obj = JSON.parse(data);
-        let r = roomm.Join(obj.room_id, obj.order, obj.name, callback);
-        if (r == false) {
-            socket.emit('err');
-        }
+        // let r = roomm.Join();
+        // if (r == false) {
+        //     socket.emit('err');
+        // }
     });
 
     socket.on('get-status', function (data) {
@@ -56,18 +41,15 @@ io.on('connection', function (socket) {
     });
 
     socket.on('operate', function (data: string) {
-        if (room_id == undefined || roomm.GetRoom(room_id) == undefined) return;
-        roomm.GetRoom(room_id).operate(order, data);
+        // TODO
     });
 
     socket.on('msg', function (data) {
-        if (room_id == undefined || roomm.GetRoom(room_id) == undefined) return;
-        roomm.GetRoom(room_id).message(order, data);
+        // TODO
     });
 
     socket.on('disconnect', function () {
-        if (room_id != undefined)
-            roomm.Exit(room_id, order);
+        // TODO
     });
 });
 

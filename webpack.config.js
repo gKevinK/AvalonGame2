@@ -4,7 +4,7 @@ const { VueLoaderPlugin } = require('vue-loader');
 module.exports = {
     entry: {
         // "vendor": [ "vue", "socket.io-client" ],
-        "index": "./src/views/index.ts",
+        "index": "./src/client/index.ts",
     },
     output: {
         filename: "[name].js",
