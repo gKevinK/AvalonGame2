@@ -20,7 +20,25 @@ io.on('connection', function (socket) {
 
     let userid: string = undefined;
 
+    function getRoom() {
+        if (userid === undefined) return undefined;
+        return roomm.GetRoom(userid);
+    }
+    
+    socket.on('get-status', function (data: string) {
+        // TODO
+        let user = userm.GetOrNew(data);
+        userid = user.id;
+        socket.emit('status', user.token);
+    });
+
+    socket.on('user-info', function (data: string) {
+        if (userid === undefined) return;
+
+    });
+
     socket.on('join-new', function (data: string) {
+        if (userid === undefined) return;
         let obj = JSON.parse(data);
         // let r = roomm.JoinNew();
         // if (r == false) {
@@ -29,6 +47,7 @@ io.on('connection', function (socket) {
     });
 
     socket.on('join', function (data) {
+        if (userid === undefined) return;
         let obj = JSON.parse(data);
         // let r = roomm.Join();
         // if (r == false) {
@@ -36,20 +55,25 @@ io.on('connection', function (socket) {
         // }
     });
 
-    socket.on('get-status', function (data) {
+    socket.on('room-op', function (data) {
         // TODO
+        if (userid === undefined) return;
     });
 
     socket.on('operate', function (data: string) {
         // TODO
+        if (userid === undefined) return;
     });
 
-    socket.on('msg', function (data) {
+    socket.on('msg', function (data: string) {
         // TODO
+        if (userid === undefined) return;
+
     });
 
     socket.on('disconnect', function () {
-        // TODO
+        if (userid === undefined) return;
+        roomm.Disconnect(userid);
     });
 });
 

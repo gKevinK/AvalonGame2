@@ -1,5 +1,6 @@
 import IGameMachine from './IGameMachine'
 import Machine from './AvalonMachine'
+import { RoomConfig } from '../common/Interface'
 
 const Util = {
     range: function (n: number) {
@@ -51,11 +52,13 @@ export class Room
     num: number;
     machine: IGameMachine;
     seats: Seat[];
+    audience: Seat;
     
-    constructor (id: string, num: number) {
+    constructor (id: string, conf: RoomConfig) {
         this.id = id;
-        this.num = num;
-        this.seats = Util.range(num).map(_ => new Seat());
+        this.num = conf.num;
+        this.seats = Util.range(this.num).map(_ => new Seat());
+        this.audience = new Seat();
     }
 
     private start () {
@@ -84,7 +87,7 @@ export class Room
             this.start();
     }
 
-    operate (n: number, op: string) : boolean {
+    Operate (n: number, op: string) : boolean {
         return this.machine.Operate(n, JSON.parse(op));
     }
 
@@ -155,6 +158,10 @@ export default class RoomManager
             this.rooms.delete(id);
             console.log('- Room ' + id + ' destroyed.');
         }
+    }
+
+    Disconnect (userid: string) : void {
+        // TODO
     }
 
     private getId(): string {

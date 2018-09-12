@@ -33,7 +33,7 @@ let app = new Vue({
         },
 
         prepare: function(): void {
-            // TODO
+            // socket.emit('prepare', '');
         },
 
         operate: function(data: object): void {
@@ -53,9 +53,11 @@ let app = new Vue({
 let socket = io();
 socket.on('connect', function () {
     console.log('Connection established.');
-    if (localStorage.getItem('user-id') != null) {
-        socket.emit('get-status', localStorage.getItem('user-id'));
-    }
+    socket.emit('get-status', localStorage.getItem('user-id') || '');
+});
+
+socket.on('status', function (data: string) {
+    console.log(data);
 });
 
 socket.on('join', function (data: string) {
