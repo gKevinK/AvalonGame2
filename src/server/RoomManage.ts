@@ -91,10 +91,13 @@ export class Room
         return this.machine.Operate(n, JSON.parse(op));
     }
 
-    
-
     message (n: number, msg: string) : void {
         this.seats.forEach(s => s.message({ order: n, text: msg }));
+    }
+
+    GetStatus (userid: string) {
+        // TODO
+        return {};
     }
 
     exit (n: number) : void {

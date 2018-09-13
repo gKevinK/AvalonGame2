@@ -62,6 +62,8 @@ export default class UserManager
     }
 
     NewToken (user: User) : string {
+        if (user.token)
+            this.tokenToUser.delete(user.token);
         let token = this.genToken();
         while (this.tokenToUser.has(token))
             token = this.genToken();

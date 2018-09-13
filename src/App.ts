@@ -2,6 +2,7 @@ import * as express from 'express';
 import * as socketio from 'socket.io';
 import UserManager from './server/UserManage';
 import RoomManager from './server/RoomManage';
+import { IStatus } from './common/Interface';
 
 const app = express();
 const server = require('http').createServer(app);
@@ -26,15 +27,17 @@ io.on('connection', function (socket) {
     }
     
     socket.on('get-status', function (data: string) {
-        // TODO
         let user = userm.GetOrNew(data);
         userid = user.id;
-        socket.emit('status', user.token);
+        let res = <IStatus>{ user: user };
+        if (user.roomid)
+            res.room = getRoom().GetStatus(user.id);
+        socket.emit('status', res);
     });
 
     socket.on('user-info', function (data: string) {
+        // TODO
         if (userid === undefined) return;
-
     });
 
     socket.on('join-new', function (data: string) {
