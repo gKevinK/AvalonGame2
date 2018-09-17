@@ -15,6 +15,7 @@ const Util = {
 class Seat
 {
     name: string = undefined;
+    prepared: boolean = false;
     private msgs: object[] = [];
     private NotifyCallback: (type: string, msg: object) => void = undefined;
 
@@ -41,6 +42,7 @@ class Seat
     }
 
     leave (): void {
+        this.name = undefined;
         this.NotifyCallback('exit', undefined);
         this.NotifyCallback = undefined;
     }
@@ -87,6 +89,11 @@ export class Room
             this.start();
     }
 
+    RoomOpr (op: string) : boolean {
+        // TODO
+        return false;
+    }
+
     Operate (n: number, op: string) : boolean {
         return this.machine.Operate(n, JSON.parse(op));
     }
@@ -120,7 +127,7 @@ export default class RoomManager
 
     JoinNew (player_num: number, order: number, name: string, callback: (type: string, msg: object) => void) : boolean {
         let id = this.getId();
-        this.rooms.set(id, new Room(id, player_num));
+        this.rooms.set(id, new Room(id, { num: player_num }));
         console.log('+ Room ' + id + ' created.');
         let r = this.Join(id, order, name, callback);
         if (r == false) {

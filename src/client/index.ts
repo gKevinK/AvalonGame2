@@ -56,6 +56,10 @@ socket.on('connect', function () {
     socket.emit('get-status', localStorage.getItem('user-id') || '');
 });
 
+socket.on('reconnect', function (data: string) {
+    socket.emit('get-status', localStorage.getItem('user-id') || '');
+});
+
 socket.on('status', function (data: string) {
     console.log(data);
 });

@@ -23,7 +23,7 @@ io.on('connection', function (socket) {
 
     function getRoom() {
         if (userid === undefined) return undefined;
-        return roomm.GetRoom(userid);
+        return roomm.GetRoom(userm.Get(userid).roomid);
     }
     
     socket.on('get-status', function (data: string) {
