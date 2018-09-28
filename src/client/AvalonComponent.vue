@@ -2,12 +2,13 @@
     <div>
         <p>Avalon Game Panel</p>
         <div v-for="(item, idx) in seats" :key="item.id">
-            <div>Player {{ idx }}: {{ item.name }}</div>
-            <div class="captain" v-if="captain == idx">[captain]</div>
-            <div class="inteam" v-if="team.includes(idx)">[in team]</div>
-            <div class="voted" v-if="false">[voted]</div>
-            <div class="agree" v-if="false">[agree]</div>
-            <div class="disagree" v-if="false">[disagree]</div>
+            <div>Player {{ idx }}: {{ item.info.name }}</div>
+            <div class="prepare" v-if="item.prepare">[Prepared]</div>
+            <div class="captain" v-if="captain == idx">[Captain]</div>
+            <div class="inteam" v-if="team.includes(idx)">[In team]</div>
+            <div class="voted" v-if="false">[Voted]</div>
+            <div class="agree" v-if="false">[Agree]</div>
+            <div class="disagree" v-if="false">[Disagree]</div>
             <input type="checkbox" v-if="status == 1 && captain == idx"
                 v-model="selections" :value="idx">
             <input type="radio" v-if="false" name="player_select" v-model="selection" :value="idx">
@@ -16,7 +17,7 @@
         <div>{{ op }}</div>
         <div class="record">
             <div v-for="(item, idx) in result" :key="item.id">
-                {{ idx + 1 }}: {{ task_player_num[idx] }} : {{ ["-", "fail", "success"][item + 1] }}
+                Round {{ idx + 1 }}: {{ task_player_num[idx] }} : {{ ["-", "fail", "success"][item + 1] }}
             </div>
             <div v-for="tn in [ 1, 2, 3, 4, 5 ]" :key="tn.id">
                 {{ tn }}
@@ -34,15 +35,16 @@
         </div>
 
         <div>
-            <div v-for="m in messages" :key="m.id">
+            <!-- <div v-for="m in messages" :key="m.id">
                 Player {{ m.order + 1 }} : {{ m.text }}
-            </div>
+            </div> -->
         </div>
     </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue';
+import { UserInfo } from '../common/RoomInterface';
 
 enum ROLE {
     Good = -3,
@@ -98,7 +100,9 @@ export default Vue.extend({
     props: [ "op", "msg" ],
 
     data: function() { return {
-        seats: new Array<{ name: string }>(5),
+        roomid: "",
+        seats: new Array<UserInfo>(5),
+        prepare: false,
         pcount: 5,
         round: -1,
         try: -1,
@@ -114,6 +118,8 @@ export default Vue.extend({
         taskvote: <Number[]> [],
         result: [ -1, -1, -1, -1, -1 ],
         messages: <any[]> [],
+
+        _user: <{ [key:string]: { info: UserInfo, seat: number } }> {},
     } },
 
     watch: {
@@ -134,6 +140,7 @@ export default Vue.extend({
                 case "make-team":
                     this.status = STATUS.MakeTeam;
                     this.captain = opr.t;
+                    this.team = [];
                     this.selections = [];
                     break;
                 case "team-vote":

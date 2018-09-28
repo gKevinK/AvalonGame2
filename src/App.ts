@@ -2,7 +2,7 @@ import * as express from 'express';
 import * as socketio from 'socket.io';
 import UserManager from './server/UserManage';
 import RoomManager from './server/RoomManage';
-import { IStatus } from './common/Interface';
+import { IStatus } from './common/RoomInterface';
 
 const app = express();
 const server = require('http').createServer(app);

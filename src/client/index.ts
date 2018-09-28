@@ -43,6 +43,8 @@ let app = new Vue({
         message: function (data: string): void {
             socket.emit('msg', data);
         },
+
+        start: function (): void {}
     },
     components: {
         JoinComponent,

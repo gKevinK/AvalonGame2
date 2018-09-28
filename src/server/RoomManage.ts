@@ -1,6 +1,6 @@
 import IGameMachine from './IGameMachine'
 import Machine from './AvalonMachine'
-import { RoomConfig } from '../common/Interface'
+import { RoomConfig } from '../common/RoomInterface'
 // import { User } from './UserManage';
 
 const Util = {
