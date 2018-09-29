@@ -1,4 +1,5 @@
 import IGameMachine from './IGameMachine';
+import { IGameStatus } from '../common/AvalonInterface';
 
 //#region Help functions
 function shuffleCopy (array: Array<any>) {
@@ -73,9 +74,9 @@ export default class AvalonMachine implements IGameMachine
     roles: Array<ROLE>;
     tpcs: Array<number>;
 
-    round: number;
-    try: number;
-    captain: number;
+    round: number = 0;
+    try: number = 0;
+    captain: number = 0;
     team: Array<number> = [];
     teamvote: Array<number> = [];
     taskvote: Array<number> = [];
@@ -223,7 +224,7 @@ export default class AvalonMachine implements IGameMachine
 
     GetStatus(num: number): object {
         // TODO
-        return {
+        return <IGameStatus>{
             pcount: this.pcount,
             status: this.status,
             role: this.roles[num],

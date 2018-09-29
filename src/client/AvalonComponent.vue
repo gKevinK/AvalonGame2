@@ -3,7 +3,7 @@
         <p>Avalon Game Panel</p>
         <div v-for="(item, idx) in seats" :key="item.id">
             <div>Player {{ idx }}: {{ item.info.name }}</div>
-            <div class="prepare" v-if="item.prepare">[Prepared]</div>
+            <div class="prepare" v-if="item.prepare[idx]">[Prepared]</div>
             <div class="captain" v-if="captain == idx">[Captain]</div>
             <div class="inteam" v-if="team.includes(idx)">[In team]</div>
             <div class="voted" v-if="false">[Voted]</div>
@@ -45,6 +45,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { UserInfo } from '../common/RoomInterface';
+import { IOperation } from '../common/AvalonInterface';
 
 enum ROLE {
     Good = -3,
@@ -89,20 +90,13 @@ const config = {
     },
 }
 
-interface IOperationObject
-{
-    op: string;
-    t: number;
-    ts: Array<number>;
-}
-
 export default Vue.extend({
     props: [ "op", "msg" ],
 
     data: function() { return {
         roomid: "",
         seats: new Array<UserInfo>(5),
-        prepare: false,
+        prepare: <number[]> [],
         pcount: 5,
         round: -1,
         try: -1,
@@ -120,23 +114,25 @@ export default Vue.extend({
         messages: <any[]> [],
 
         _user: <{ [key:string]: { info: UserInfo, seat: number } }> {},
-    } },
+    }; },
 
     watch: {
-        op: function (opr): void {
-            switch (opr.type) {
-                case "status":
-                    this.seats = (<string[]>opr.names).map(n => <{ name: string }>{ name: n });
-                    this.pcount = opr.status.pcount;
-                    this.status = opr.status.status;
-                    this.role = opr.status.role;
-                    this.knowledge = opr.status.knowledge;
-                    this.result = opr.status.result;
-                    this.round = opr.status.round;
-                    this.try = opr.status.try;
-                    this.captain = opr.status.captain;
-                    this.team = opr.status.team;
-                    break;
+        op: function (obj): void {
+            if (obj.type === "status") {
+                this.seats = (<string[]>opr.names).map(n => <{ name: string }>{ name: n });
+                this.pcount = opr.status.pcount;
+                this.status = opr.status.status;
+                this.role = opr.status.role;
+                this.knowledge = opr.status.knowledge;
+                this.result = opr.status.result;
+                this.round = opr.status.round;
+                this.try = opr.status.try;
+                this.captain = opr.status.captain;
+                this.team = opr.status.team;
+                return;
+            }
+            let opr = <IOperation>obj;
+            switch (opr.op) {
                 case "make-team":
                     this.status = STATUS.MakeTeam;
                     this.captain = opr.t;
@@ -152,7 +148,7 @@ export default Vue.extend({
                 case "team-vote-i":
                     (this.teamvote as Array<Number>).splice(opr.t, 1, -2);
                     break;
-                case "team-vote-res":
+                case "team-vote-r":
                     // TODO
                     break;
                 case "task-vote":
@@ -164,7 +160,7 @@ export default Vue.extend({
                 case "task-vote-i":
                     (this.taskvote as Array<Number>).splice(opr.t, 1, -2);
                     break;
-                case "task-vote-res":
+                case "task-vote-r":
                     // TODO
                     break;
                 case "assassin":
@@ -173,6 +169,7 @@ export default Vue.extend({
                     // TODO
                     break;
                 case "end":
+                    this.status = STATUS.End;
                     // TODO
                     break;
             }

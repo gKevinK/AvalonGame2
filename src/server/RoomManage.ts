@@ -13,7 +13,7 @@ const Util = {
     }
 };
 
-class UserInfo
+interface UserInfo
 {
     userid: string;
     name: string;
@@ -21,10 +21,10 @@ class UserInfo
 
 class Seat
 {
-    userinfo: UserInfo = undefined;
+    userinfo?: UserInfo = undefined;
     prepared: boolean = false;
     private msgs: object[] = [];
-    private NotifyCallback: (type: string, msg: object) => void = undefined;
+    private NotifyCallback?: (type: string, msg: object) => void = undefined;
 
     sit (userinfo: UserInfo, callback: (type: string, msg: object) => void): void {
         this.userinfo = userinfo;
@@ -54,7 +54,7 @@ class Seat
 
     leave (): void {
         this.userinfo = undefined;
-        this.NotifyCallback('exit', undefined);
+        this.NotifyCallback('exit', {});
         this.NotifyCallback = undefined;
     }
 }

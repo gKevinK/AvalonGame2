@@ -6,7 +6,7 @@
         "sourceMap": true,
         // "types": [ "node", "socket.io-client" ],
         "outDir": "dist",
-        // "strict": true,
+        "strict": true,
         "allowJs": true,
         "allowSyntheticDefaultImports": true,
     },
