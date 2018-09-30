@@ -119,6 +119,7 @@ export default Vue.extend({
     watch: {
         op: function (obj): void {
             if (obj.type === "status") {
+                this._user = undefined;
                 this.seats = (<string[]>opr.names).map(n => <{ name: string }>{ name: n });
                 this.pcount = opr.status.pcount;
                 this.status = opr.status.status;

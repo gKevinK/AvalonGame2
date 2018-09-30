@@ -1,6 +1,6 @@
 import IGameMachine from './IGameMachine'
 import Machine from './AvalonMachine'
-import { RoomConfig } from '../common/RoomInterface'
+import { IRoomConfig, IRoomStatus } from '../common/RoomInterface'
 // import { User } from './UserManage';
 
 const Util = {
@@ -19,18 +19,20 @@ interface UserInfo
     name: string;
 }
 
+type NotifyCb = (type: string, msg: object) => void;
+
 class Seat
 {
     userinfo?: UserInfo = undefined;
     prepared: boolean = false;
     private msgs: object[] = [];
-    private NotifyCallback?: (type: string, msg: object) => void = undefined;
+    private NotifyCallback?: NotifyCb = undefined;
 
-    sit (userinfo: UserInfo, callback: (type: string, msg: object) => void): void {
+    sit (userinfo: UserInfo, callback: NotifyCb): void {
         this.userinfo = userinfo;
         this.NotifyCallback = callback;
         this.msgs.forEach(m => {
-            this.NotifyCallback('msg', m);
+            this.notify('msg', m);
         });
     }
 
@@ -54,7 +56,7 @@ class Seat
 
     leave (): void {
         this.userinfo = undefined;
-        this.NotifyCallback('exit', {});
+        this.notify('exit', {});
         this.NotifyCallback = undefined;
     }
 }
@@ -63,12 +65,12 @@ export class Room
 {
     id: string;
     num: number;
-    machine: IGameMachine;
+    machine?: IGameMachine;
     seats: Seat[];
     audience: Seat;
-    private id2seat: Map<string, number>;
+    private _user: Map<string, { info: UserInfo, seat: number,  }>;
     
-    constructor (id: string, conf: RoomConfig) {
+    constructor (id: string, conf: IRoomConfig) {
         this.id = id;
         this.num = conf.num;
         this.seats = Util.range(this.num).map(_ => new Seat());
@@ -106,17 +108,26 @@ export class Room
     }
 
     Operate (userid: string, op: string) : boolean {
-        if (! this.id2seat.has(userid) || this.id2seat[userid] === -1) return false;
-        return this.machine.Operate(this.id2seat[userid], JSON.parse(op));
+        let d = this._user.get(userid);
+        if (d === undefined || d.seat === -1) return false;
+        return this.machine.Operate(d.seat, JSON.parse(op));
     }
 
     Message (userid: string, msg: string) : void {
         this.seats.forEach(s => s.message({ userid: userid, text: msg }));
     }
 
-    GetStatus (userid: string) {
-        // TODO
-        return {};
+    GetStatus (userid: string) : IRoomStatus | undefined {
+        let d = this._user.get(userid);
+        if (d === undefined) return undefined;
+        return {
+            roomid: this.id,
+            userid: userid,
+            _users: {}, // TODO
+            prepare: this.seats.map(s => s.prepared),
+            
+            game: this.machine.GetStatus(d.seat),
+        };
     }
 
     exit (userid: string) : void {

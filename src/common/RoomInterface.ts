@@ -1,9 +1,17 @@
-export class RoomConfig {
+export interface IRoomConfig {
     num: number;
     // TODO
     // allowAudience: boolean;
 }
 
+export interface IRoomStatus {
+    userid: string;
+    roomid: string;
+    _users: { [key:string]: { info: UserInfo, seat: number } };
+    prepare: boolean[];
+
+    game: object;
+}
 export interface IStatus {
     user: {
         id: string,
@@ -11,7 +19,7 @@ export interface IStatus {
         roomid: string,
         token: string,
     };
-    room?: object;
+    room?: IRoomStatus;
 }
 
 export interface UserInfo {
