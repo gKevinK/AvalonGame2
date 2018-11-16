@@ -2,9 +2,9 @@
     <div>
         <p>Avalon Game Panel</p>
         <div v-for="(item, idx) in seats" :key="item.id">
-            <div>Player {{ idx }}: {{ item.info.name }}</div>
-            <div class="prepare" v-if="item.prepare[idx]">[Prepared]</div>
-            <div class="captain" v-if="captain == idx">[Captain]</div>
+            <div>Player {{ idx + 1 }}: {{ item.name }}</div>
+            <div class="prepare" v-if="prepare[idx]">[Prepared]</div>
+            <div class="captain" v-if="captain === idx">[Captain]</div>
             <div class="inteam" v-if="team.includes(idx)">[In team]</div>
             <div class="voted" v-if="false">[Voted]</div>
             <div class="agree" v-if="false">[Agree]</div>
@@ -44,8 +44,16 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { UserInfo } from '../common/RoomInterface';
-import { IOperation } from '../common/AvalonInterface';
+import { IUserInfo, IRoomN, IRoomStatus } from '../common/RoomInterface';
+import { IOperation, IGameStatus } from '../common/AvalonInterface';
+
+const Util = {
+    range: function (n: number) {
+        var arr = [];
+        for (var i = 0; i < n; i++) arr.push(i);
+        return arr;
+    },
+};
 
 enum ROLE {
     Good = -3,
@@ -91,75 +99,71 @@ const config = {
 }
 
 export default Vue.extend({
-    props: [ "op", "msg" ],
-
+    // props: [ "op", "msg", "room" ],
+    props: {
+        room: Object
+    },
     data: function() { return {
+        userid: "",
         roomid: "",
-        seats: new Array<UserInfo>(5),
-        prepare: <number[]> [],
+        seats: <IUserInfo[]> [],
+        prepare: <boolean[]> [],
         pcount: 5,
         round: -1,
         try: -1,
         myseat: -1,
         role: ROLE.Unknown,
-        knowledge: <Number[]> [],
+        knowledge: <number[]> [],
         selection: -1,
-        selections: <Number[]> [],
+        selections: <number[]> [],
         status: STATUS.MakeTeam,
         captain: 0,
-        team: <Number[]> [],
-        teamvote: <Number[]> [],
-        taskvote: <Number[]> [],
+        team: <number[]> [],
+        teamvote: <number[]> [],
+        taskvote: <number[]> [],
         result: [ -1, -1, -1, -1, -1 ],
         messages: <any[]> [],
 
-        _user: <{ [key:string]: { info: UserInfo, seat: number } }> {},
+        _user: <{ [key:string]: { info: IUserInfo, seat: number } }> {},
     }; },
 
+    mounted: function () {
+        this.update(this.room);
+    },
+
     watch: {
-        op: function (obj): void {
-            if (obj.type === "status") {
-                this._user = undefined;
-                this.seats = (<string[]>opr.names).map(n => <{ name: string }>{ name: n });
-                this.pcount = opr.status.pcount;
-                this.status = opr.status.status;
-                this.role = opr.status.role;
-                this.knowledge = opr.status.knowledge;
-                this.result = opr.status.result;
-                this.round = opr.status.round;
-                this.try = opr.status.try;
-                this.captain = opr.status.captain;
-                this.team = opr.status.team;
-                return;
-            }
-            let opr = <IOperation>obj;
-            switch (opr.op) {
+        room: function (obj) {
+            this.update(obj);
+        },
+
+        op: function (obj: IOperation): void {
+            switch (obj.op) {
                 case "make-team":
                     this.status = STATUS.MakeTeam;
-                    this.captain = opr.t;
+                    this.captain = obj.t;
                     this.team = [];
                     this.selections = [];
                     break;
                 case "team-vote":
                     this.status = STATUS.TeamVote;
-                    this.team = opr.ts;
+                    this.team = obj.ts;
                     this.selection = -1;
                     // TODO
                     break;
                 case "team-vote-i":
-                    (this.teamvote as Array<Number>).splice(opr.t, 1, -2);
+                    (this.teamvote as Array<Number>).splice(obj.t, 1, -2);
                     break;
                 case "team-vote-r":
                     // TODO
                     break;
                 case "task-vote":
                     this.status = STATUS.TaskVote;
-                    this.taskvote = opr.ts;
+                    this.taskvote = obj.ts;
                     this.selection = -1;
                     // TODO
                     break;
                 case "task-vote-i":
-                    (this.taskvote as Array<Number>).splice(opr.t, 1, -2);
+                    (this.taskvote as Array<Number>).splice(obj.t, 1, -2);
                     break;
                 case "task-vote-r":
                     // TODO
@@ -182,7 +186,30 @@ export default Vue.extend({
     },
 
     methods: {
-
+        update: function (obj: IRoomStatus): void {
+            if (!obj) return;
+            this._user = {};
+            obj._users.forEach(u => this._user[u.info.userid] = u);
+            this.userid = obj.userid;
+            this.roomid = obj.roomid;
+            this.pcount = obj.num;
+            this.seats = Util.range(this.pcount).map(_ => <IUserInfo>{ name: '----' });
+            this.prepare = obj.prepare;
+            for (var u in this._user) {
+                if (this._user[u].seat >= 0)
+                    this.seats[this._user[u].seat] = this._user[u].info;
+            }
+            if (obj.game) {
+                let game = <IGameStatus>obj.game;
+                this.role = game.role;
+                this.knowledge = game.knowledge;
+                this.result = game.result;
+                this.round = game.round;
+                this.try = game.try;
+                this.captain = game.captain;
+                this.team = game.team;
+            }
+        }
     },
 
     computed: {

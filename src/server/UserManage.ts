@@ -2,21 +2,22 @@
 
 //#endregion
 
-export class User
+export interface IUser
 {
     id: string;
     name: string;
-    roomid: string;
+    roomid?: string;
     token: string;
 }
 
 export default class UserManager
 {
-    users: Map<string, User>;
-    tokenToUser: Map<string, string>;
+    private users: Map<string, IUser>;
+    private tokenToUser: Map<string, string>;
 
     constructor () {
-        this.users = new Map<string, User>();
+        this.users = new Map();
+        this.tokenToUser = new Map();
     }
 
     private genId() {
@@ -31,7 +32,7 @@ export default class UserManager
              + Math.random().toString(36).substring(2, 15);
     }
 
-    Register () : User {
+    Register () : IUser {
         throw new Error("Method not implemented.");
     }
 
@@ -39,41 +40,37 @@ export default class UserManager
         throw new Error("Method not implemented.");
     }
 
-    NewUser() : User {
-        let user = new User();
+    NewUser (name?: string) : IUser {
         let id = this.genId();
-        user.id = id;
-        user.name = 'T' + id;
-        this.users[id] = user;
+        let user = <IUser>{ id: id, name: (name ? name : 'T' + id) };
+        this.users.set(id, user);
         return user;
     }
 
-    Get (userid: string) : User {
-        if (! this.users.has(userid)) return undefined;
-        return this.users[userid];
+    Get (userid: string) : IUser | undefined {
+        return this.users.get(userid);
     }
 
-    GetOrNew (token: string) : User {
-        if (this.tokenToUser.has(token))
-            return this.users[this.tokenToUser[token]];
-        let user = this.NewUser();
-        this.NewToken(user);
-        return user;
+    GetByToken (token: string) : IUser | undefined {
+        if (!this.tokenToUser.has(token)) return undefined;
+        return this.users.get(this.tokenToUser.get(token) as string);
     }
 
-    NewToken (user: User) : string {
+    NewToken (user: IUser) : string {
         if (user.token)
             this.tokenToUser.delete(user.token);
         let token = this.genToken();
         while (this.tokenToUser.has(token))
             token = this.genToken();
         user.token = token;
-        this.tokenToUser[token] = user.id;
+        this.tokenToUser.set(token, user.id);
         return token;
     }
 
     Destroy (userid: string) {
-        this.tokenToUser.delete(this.users[userid].token);
+        let u = this.users.get(userid);
+        if (!u) return;
+        this.tokenToUser.delete(u.token);
         this.users.delete(userid);
     }
 }

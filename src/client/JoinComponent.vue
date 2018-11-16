@@ -2,6 +2,7 @@
     <div>
         <p>Join game panel</p>
         <input type="text" v-model="name" placeholder="昵称">
+        <button @click="user_info">确定</button>
         <input type="text" v-model="room_id" placeholder="房间号">
         <select v-model.number="player_num">
             <option>5</option>
@@ -20,29 +21,34 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import { IJoinNew, IJoin } from '../common/RoomInterface';
 export default Vue.extend({
+    props: {
+        name: String, 
+    },
     data: function() { return {
-        name: '',
         room_id: '',
         player_num: 5,
         random_order: true,
         order: 0,
-    }},
+    } },
     methods: {
+        user_info: function(): void {
+            this.$emit("ev", { type: "user-info", data: this.name });
+        },
+
         join_new: function(): void {
-            this.$emit("join_new", {
-                name: this.name,
-                player_num: this.player_num,
-                order: this.random_order ? -1 : this.order - 1,
-            });
+            this.$emit("ev", { type: "join-new", data: <IJoinNew>{
+                conf: { num: this.player_num },
+                // seat: this.random_order ? -1 : this.order - 1,
+            }});
         },
 
         join: function(): void {
-            this.$emit("join", {
-                name: this.name,
-                room_id: this.room_id,
-                order: this.random_order ? -1 : this.order - 1,
-            });
+            this.$emit("ev", { type: "join", data: <IJoin>{
+                roomid: this.room_id,
+                // seat: this.random_order ? -1 : this.order - 1,
+            }});
         },
     }
 });

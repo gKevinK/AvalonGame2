@@ -2,11 +2,11 @@ import IGameMachine from './IGameMachine';
 
 export default class GomokuMachine implements IGameMachine
 {
-    NotifyCallback : {(nums: Array<number>, msg: object) : void};
+    NotifyCallback : (nums: number[], msg: object) => void;
 
     constructor()
     {
-        
+        this.NotifyCallback = (os, m) => {};
     }
 
     Start() : void

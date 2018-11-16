@@ -2,7 +2,7 @@ import Vue from 'vue';
 import IGameVM from './IGameVM';
 import JoinComponent from './JoinComponent.vue';
 import GameComponent from './AvalonComponent.vue';
-import { randomBytes } from 'crypto';
+import { IRoomConfig, IRoomOp, IRoomStatus, IStatus, IUserStatus, IRoomN } from '../common/RoomInterface';
 
 declare var io: SocketIOClientStatic;
 
@@ -12,39 +12,21 @@ let app = new Vue({
     el: "#app",
     template: `
     <div>
-        <join-component @join="join" @join_new="join_new" />
-        <game-component :op="op" :msg="msg" />
+        <join-component v-if="!room" @ev="event" :name="user ? user.name : ''" />
+        <game-component v-if="room" @ev="event" :op="op" :msg="msg" :room="room" />
     </div>
     `,
     data: function() { return {
-        op: "",
+        user: <IUserStatus | undefined>undefined,
+        room: <IRoomStatus | undefined>undefined,
+
+        op: {},
         msg: {},
-        // status: 1,
-        room_id: undefined,
-        users: {},
-    }},
+    } },
     methods: {
-        join_new: function(data: object): void {
-            socket.emit('join-new', JSON.stringify(data));
+        event: function (data: { type: string, data: object }): void {
+            socket.emit(data.type, JSON.stringify(data.data));
         },
-
-        join: function(data: object): void {
-            socket.emit('join', JSON.stringify(data));
-        },
-
-        prepare: function(): void {
-            // socket.emit('prepare', '');
-        },
-
-        operate: function(data: object): void {
-            socket.emit('operate', JSON.stringify(data));
-        },
-
-        message: function (data: string): void {
-            socket.emit('msg', data);
-        },
-
-        start: function (): void {}
     },
     components: {
         JoinComponent,
@@ -55,31 +37,40 @@ let app = new Vue({
 let socket = io();
 socket.on('connect', function () {
     console.log('Connection established.');
-    socket.emit('get-status', localStorage.getItem('user-id') || '');
+    socket.emit('get-status', localStorage.getItem('user-id') || '""');
 });
 
-socket.on('reconnect', function (data: string) {
-    socket.emit('get-status', localStorage.getItem('user-id') || '');
+socket.on('reconnect', function () {
+    socket.emit('get-status', localStorage.getItem('user-id') || '""');
 });
 
-socket.on('status', function (data: string) {
-    console.log(data);
+socket.on('status', function (data: IStatus) {
+    // console.log(data);
+    app.user = data.user;
+    app.room = data.room;
+    if (data.user) localStorage.setItem('user-id', data.user.token);
 });
 
-socket.on('join', function (data: string) {
-    console.log(data);
+socket.on('user-status', function (data: IUserStatus) {
+    // console.log(data);
+    app.user = data;
+    localStorage.setItem('user-id', app.user.token);
 });
 
-socket.on('msg', function (data: string) {
-    app.msg = JSON.parse(data);
+socket.on('join', function () {
+    socket.emit('get-status', localStorage.getItem('user-id') || '""');
 });
 
-socket.on('room', function (data: string) {
-    app.op = JSON.parse(data);
+socket.on('msg', function (data: object) {
+    app.msg = data;
 });
 
-socket.on('update', function (data: string) {
-    app.op = JSON.parse(data);
+socket.on('room', function (data: IRoomN) {
+    app.op = data;
+});
+
+socket.on('update', function (data: object) {
+    app.op = data;
 });
 
 socket.on('disconnect', function () {

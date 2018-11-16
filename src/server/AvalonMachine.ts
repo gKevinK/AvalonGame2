@@ -69,10 +69,10 @@ interface IOperationObject
 
 export default class AvalonMachine implements IGameMachine
 {
-    pcount: number;
+    pcount: 5 | 6 | 7 | 8 | 9 | 10;
     status: STATUS;
-    roles: Array<ROLE>;
-    tpcs: Array<number>;
+    roles: Array<ROLE> = [];
+    tpcs: Array<number> = [];
 
     round: number = 0;
     try: number = 0;
@@ -85,7 +85,7 @@ export default class AvalonMachine implements IGameMachine
     NotifyCallback : (nums: number[], msg: object) => void;
 
     constructor(player_count: number) {
-        this.pcount = player_count;
+        this.pcount = < 5 | 6 | 7 | 8 | 9 | 10 >player_count;
         this.NotifyCallback = (os, m) => {};
         this.status = STATUS.Wait;
         this.teamvote = Array(this.pcount).fill(-1);
@@ -93,7 +93,7 @@ export default class AvalonMachine implements IGameMachine
     
     private knowledge(num: number) : Array<number> {
         var r = this.roles[num];
-        var knowledge = [];
+        var knowledge = <number[]>[];
         if (r == ROLE.Merlin) {
             this.roles.map((v1, i1) => {
                 if ([ROLE.Morgana, ROLE.Minion, ROLE.Oberon, ROLE.Assassin].some(v2 => v1 == v2))
