@@ -2,7 +2,7 @@ import * as express from 'express';
 import * as socketio from 'socket.io';
 import UserManager from './server/UserManage';
 import RoomManager from './server/RoomManage';
-import { IStatus, IJoinNew, IUserInfo, IJoin } from './common/RoomInterface';
+import { IStatus, IJoinNew, IUserInfo, IJoin, IRoomOp } from './common/RoomInterface';
 
 const app = express();
 const server = require('http').createServer(app);
@@ -54,9 +54,11 @@ io.on('connection', function (socket) {
         if (u) {
             userid = u.id;
             res.user = u;
-            if (u.roomid) {
-                let room = getRoom();
-                res.room = room ? room.GetStatus(u.id) : undefined;
+            let room = getRoom();
+            if (room) {
+                // TODO
+                room.Reconnect(u.id, cb);
+                res.room = room.GetStatus(u.id);
             }
         }
         socket.emit('status', res);
@@ -64,7 +66,7 @@ io.on('connection', function (socket) {
 
     socket.on('user-info', function (data: string) {
         // let name = <IUserInfo>JSON.parse(data);
-        let name = JSON.parse(data);
+        let name = data;
         if (name.length < 4 || name.length > 12) return;
         if (userid) {
             let u = getUser();
@@ -80,33 +82,30 @@ io.on('connection', function (socket) {
         }
     });
 
-    socket.on('join-new', function (data: string) {
+    socket.on('join-new', function (obj: IJoinNew) {
         let u = getUser();
         if (!u) return;
-        let obj = <IJoinNew>JSON.parse(data);
         let r = roomm.JoinNew(obj.conf, -1, { userid: u.id, name: u.name }, cb);
         if (r == false) {
             socket.emit('err');
         }
     });
 
-    socket.on('join', function (data) {
+    socket.on('join', function (obj: IJoin) {
         let u = getUser();
         if (!u) return;
-        let obj = <IJoin>JSON.parse(data);
         let r = roomm.Join(obj.roomid, -1, { userid: u.id, name: u.name }, cb);
         if (r == false) {
             socket.emit('err');
         }
     });
 
-    socket.on('room', function (data) {
-        // TODO
-        if (userid === undefined) return;
+    socket.on('room', function (data: IRoomOp) {
+        let r = getRoom();
+        if (r) r.RoomOpr(<string>userid, data);
     });
 
     socket.on('operate', function (data: string) {
-        // TODO
         let r = getRoom();
         if (r) r.Operate(<string>userid, data);
     });
@@ -121,6 +120,13 @@ io.on('connection', function (socket) {
         if (u && u.roomid) {
             roomm.Disconnect(u.id, u.roomid);
         }
+    });
+
+    socket.on('reconnect', function () {
+        // Fix later
+        let u = getUser();
+        let r = getRoom();
+        if (u && r) r.Reconnect(u.id, cb);
     });
 });
 

@@ -1,6 +1,6 @@
 import IGameMachine from './IGameMachine'
 import Machine from './AvalonMachine'
-import { IUserInfo, IRoomConfig, IRoomStatus } from '../common/RoomInterface'
+import { IUserInfo, IRoomConfig, IRoomStatus, IRoomOp, IRoomN } from '../common/RoomInterface'
 // import { User } from './UserManage';
 
 const Util = {
@@ -20,7 +20,7 @@ class Seat
     userinfo?: IUserInfo = undefined;
     prepared: boolean = false;
     // private msgs: object[] = [];
-    private NotifyCallback?: NotifyCb = undefined;
+    NotifyCallback?: NotifyCb = undefined;
 
     sit (userinfo: IUserInfo, callback: NotifyCb): void {
         this.userinfo = userinfo;
@@ -50,7 +50,6 @@ class Seat
 
     leave (): void {
         this.userinfo = undefined;
-        this.notify('exit', {});
         this.NotifyCallback = undefined;
     }
 }
@@ -108,17 +107,24 @@ export class Room
             this.start();
     }
 
-    RoomOpr (op: string) : boolean {
+    RoomOpr (userid: string, op: IRoomOp) : boolean {
         // TODO
+        let d = this._user.get(userid);
+        if (op.op === "move") return this.move(userid, op.t);
         return false;
     }
 
     move (userid: string, t: number) : boolean {
-        if (!this.seats[t] || !this.seats[t].empty()) return false;
         let u = this._user.get(userid);
         if (!u || !u.cb) return false;
-        this.seats[t].sit(u.info, u.cb);
-        this._user.forEach(u => u.cb && u.cb('room', { type: 'move', userid: userid, t: t }));
+        if (u.seat !== -1)
+            this.seats[u.seat].leave();
+        if (t !== -1) {
+            if (!this.seats[t] || !this.seats[t].empty()) return false;
+            this.seats[t].sit(u.info, u.cb);
+        }
+        u.seat = t;
+        this._user.forEach(u => u.cb && u.cb('room', <IRoomN>{ type: 'move-i', userid: userid, t: t }));
         return true;
     }
 
@@ -137,9 +143,9 @@ export class Room
     Disconnect (userid: string) : void {
         let u = this._user.get(userid);
         if (! u) return;
-        this._user.forEach(s => s.cb && s.cb('room', { type: 'disconnect', userid: userid }));
+        this._user.forEach(s => s.cb && s.cb('room', <IRoomN>{ type: 'disconn-i', userid: userid }));
         if (u.seat !== -1) {
-            this.seats[u.seat].leave();
+            this.seats[u.seat].offline();
         }
         u.cb = undefined;
     }
@@ -147,8 +153,10 @@ export class Room
     Reconnect (userid: string, cb: NotifyCb) : void {
         let u = this._user.get(userid);
         if (!u) return;
-        this._user.forEach(s => s.cb && s.cb('room', { type: 'reconnect', userid: userid }));
+        this._user.forEach(s => s.cb && s.cb('room', <IRoomN>{ type: 'reconn-i', userid: userid }));
         u.cb = cb;
+        if (u.seat !== -1)
+            this.seats[u.seat].NotifyCallback = cb;
     }
 
     GetStatus (userid: string) : IRoomStatus | undefined {
@@ -160,6 +168,7 @@ export class Room
             _users: [...this._user.values()].map(v => { return { info: v.info, seat: v.seat }; }),
             prepare: this.seats.map(s => s.prepared),
             num: this.num,
+            status: 1,
             
             game: this.machine ? this.machine.GetStatus(d.seat) : undefined,
         };
@@ -170,6 +179,7 @@ export class Room
         let u = this._user.get(userid);
         if (u) {
             if (u.seat !== -1) this.seats[u.seat].leave();
+            u.cb && u.cb('exit', { });
             this._user.delete(userid);
         }
     }

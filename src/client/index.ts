@@ -13,19 +13,20 @@ let app = new Vue({
     template: `
     <div>
         <join-component v-if="!room" @ev="event" :name="user ? user.name : ''" />
-        <game-component v-if="room" @ev="event" :op="op" :msg="msg" :room="room" />
+        <game-component v-if="room" @ev="event" :roomn="roomn" :op="op" :msg="msg" :stat="room" />
     </div>
     `,
     data: function() { return {
         user: <IUserStatus | undefined>undefined,
         room: <IRoomStatus | undefined>undefined,
 
+        roomn: {},
         op: {},
         msg: {},
     } },
     methods: {
         event: function (data: { type: string, data: object }): void {
-            socket.emit(data.type, JSON.stringify(data.data));
+            socket.emit(data.type, data.data);
         },
     },
     components: {
@@ -66,7 +67,8 @@ socket.on('msg', function (data: object) {
 });
 
 socket.on('room', function (data: IRoomN) {
-    app.op = data;
+    console.log(JSON.stringify(data));
+    app.roomn = data;
 });
 
 socket.on('update', function (data: object) {

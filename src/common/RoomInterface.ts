@@ -26,6 +26,7 @@ export interface IRoomStatus {
     _users: { info: IUserInfo, seat: number }[];
     prepare: boolean[];
     num: number;
+    status: number;
 
     game?: object;
 }
@@ -41,10 +42,11 @@ export interface IUserInfo {
 
 export interface IRoomOp {
     op: "prepare" | "exit" | "move";
-    t?: number;
+    t: number;
 }
 
 export interface IRoomN {
-    type: "exit-i" | "move";
-    
+    type: "exit-i" | "disconn-i" | "reconn-i" | "move-i";
+    userid: string;
+    t: number;
 }

@@ -1,7 +1,7 @@
 <template>
     <div>
-        <p>Avalon Game Panel</p>
-        <div v-for="(item, idx) in seats" :key="item.id">
+        <p>Room id : {{ roomid }}</p>
+        <div class="seat" v-for="(item, idx) in seats" :key="item.id" style="border: 1px solid #DDD; padding: 0.5rem; ">
             <div>Player {{ idx + 1 }}: {{ item.name }}</div>
             <div class="prepare" v-if="prepare[idx]">[Prepared]</div>
             <div class="captain" v-if="captain === idx">[Captain]</div>
@@ -12,7 +12,9 @@
             <input type="checkbox" v-if="status == 1 && captain == idx"
                 v-model="selections" :value="idx">
             <input type="radio" v-if="false" name="player_select" v-model="selection" :value="idx">
+            <button v-if="status == 0" @click="move(idx)">{{ _users[userid].seat == idx ? "Leave" : "Sit" }}</button>
         </div>
+        <button v-if="status == 0 && _users[userid].seat != -1" @click="prep">Prepare</button>
 
         <div>{{ op }}</div>
         <div class="record">
@@ -44,7 +46,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import { IUserInfo, IRoomN, IRoomStatus } from '../common/RoomInterface';
+import { IUserInfo, IRoomN, IRoomStatus, IRoomOp } from '../common/RoomInterface';
 import { IOperation, IGameStatus } from '../common/AvalonInterface';
 
 const Util = {
@@ -99,10 +101,8 @@ const config = {
 }
 
 export default Vue.extend({
-    // props: [ "op", "msg", "room" ],
-    props: {
-        room: Object
-    },
+    props: [ "op", "msg", "stat", "roomn" ],
+
     data: function() { return {
         userid: "",
         roomid: "",
@@ -124,16 +124,34 @@ export default Vue.extend({
         result: [ -1, -1, -1, -1, -1 ],
         messages: <any[]> [],
 
-        _user: <{ [key:string]: { info: IUserInfo, seat: number } }> {},
+        _users: <{ [key:string]: { info: IUserInfo, seat: number } }> {},
     }; },
 
     mounted: function () {
-        this.update(this.room);
+        this.update(this.stat);
     },
 
     watch: {
-        room: function (obj) {
+        stat: function (obj: IRoomStatus) {
             this.update(obj);
+        },
+
+        roomn: function (obj: IRoomN) {
+            switch (obj.type) {
+                case "move-i":
+                    let u = this._users[obj.userid];
+                    if (u.seat !== -1)
+                        this.seats[u.seat] = <IUserInfo>{ name: '----' };
+                    if (obj.t !== -1)
+                        this.seats[obj.t] = u.info;
+                    u.seat = obj.t;
+                    break;
+                case "disconn-i": case "reconn-i":
+                    break;
+                case "exit-i":
+                    delete this._users[obj.userid];
+                    break;
+            }
         },
 
         op: function (obj: IOperation): void {
@@ -148,7 +166,6 @@ export default Vue.extend({
                     this.status = STATUS.TeamVote;
                     this.team = obj.ts;
                     this.selection = -1;
-                    // TODO
                     break;
                 case "team-vote-i":
                     (this.teamvote as Array<Number>).splice(obj.t, 1, -2);
@@ -188,16 +205,17 @@ export default Vue.extend({
     methods: {
         update: function (obj: IRoomStatus): void {
             if (!obj) return;
-            this._user = {};
-            obj._users.forEach(u => this._user[u.info.userid] = u);
+            this._users = {};
+            obj._users.forEach(u => this._users[u.info.userid] = u);
             this.userid = obj.userid;
             this.roomid = obj.roomid;
             this.pcount = obj.num;
             this.seats = Util.range(this.pcount).map(_ => <IUserInfo>{ name: '----' });
             this.prepare = obj.prepare;
-            for (var u in this._user) {
-                if (this._user[u].seat >= 0)
-                    this.seats[this._user[u].seat] = this._user[u].info;
+            this.status = 0;
+            for (var u in this._users) {
+                if (this._users[u].seat >= 0)
+                    this.seats[this._users[u].seat] = this._users[u].info;
             }
             if (obj.game) {
                 let game = <IGameStatus>obj.game;
@@ -209,7 +227,29 @@ export default Vue.extend({
                 this.captain = game.captain;
                 this.team = game.team;
             }
-        }
+        },
+
+        move: function (t: number) {
+            if (t === this._users[this.userid].seat) t = -1;
+            this.$emit("ev", { type: "room", data: <IRoomOp>{ op: "move", t: t } });
+        },
+
+        prep: function () {
+            if (this._users[this.userid].seat === -1) return;
+            this.$emit("ev", { type: "room", data: <IRoomOp>{ op: "prepare" }});
+        },
+
+        submit: function () {
+            // TODO
+            var op = "";
+            this.$emit("ev", { type: "op", data: <IOperation>{ op: op, t: this.selection } });
+        },
+
+        submitMulti: function () {
+            // TODO
+            var op = "";
+            this.$emit("ev", { type: "op", data: <IOperation>{ op: op, ts: this.selections } });
+        },
     },
 
     computed: {
