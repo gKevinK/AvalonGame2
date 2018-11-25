@@ -151,6 +151,9 @@ export default Vue.extend({
                 case "exit-i":
                     delete this._users[obj.userid];
                     break;
+                case "prepare":
+                    this.prepare.splice(obj.t, 1, true);
+                    break;
             }
         },
 
@@ -168,7 +171,7 @@ export default Vue.extend({
                     this.selection = -1;
                     break;
                 case "team-vote-i":
-                    (this.teamvote as Array<Number>).splice(obj.t, 1, -2);
+                    this.teamvote.splice(obj.t, 1, -2);
                     break;
                 case "team-vote-r":
                     // TODO

@@ -109,8 +109,17 @@ export class Room
 
     RoomOpr (userid: string, op: IRoomOp) : boolean {
         // TODO
-        let d = this._user.get(userid);
-        if (op.op === "move") return this.move(userid, op.t);
+        let u = this._user.get(userid);
+        if (!u) return false;
+        switch (op.op) {
+            case "move":
+                return this.move(userid, op.t);
+            case "prepare":
+                if (u.seat === -1) return false;
+                this.seats[u.seat].prepared = true;
+                this._user.forEach(u => u.cb && u.cb('room', <IRoomN>{ type: 'prepare', t: u.seat }));
+                break;
+        }
         return false;
     }
 

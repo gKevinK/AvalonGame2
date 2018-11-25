@@ -40,13 +40,13 @@ export interface IUserInfo {
     name: string;
 }
 
-export interface IRoomOp {
-    op: "prepare" | "exit" | "move";
-    t: number;
-}
+export type IRoomOp = { op: "prepare" | "exit" } | { op: "move"; t: number; }
 
-export interface IRoomN {
+export type IRoomN = {
     type: "exit-i" | "disconn-i" | "reconn-i" | "move-i";
     userid: string;
+    t: number;
+} | {
+    type: "prepare";
     t: number;
 }
