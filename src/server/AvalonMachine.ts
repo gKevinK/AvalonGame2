@@ -1,5 +1,5 @@
 import IGameMachine from './IGameMachine';
-import { IGameStatus } from '../common/AvalonInterface';
+import { IGameStatus, IGameN, IOp } from '../common/AvalonInterface';
 
 //#region Help functions
 function shuffleCopy (array: Array<any>) {
@@ -70,7 +70,7 @@ interface IOperationObject
 export default class AvalonMachine implements IGameMachine
 {
     pcount: 5 | 6 | 7 | 8 | 9 | 10;
-    status: STATUS;
+    status: STATUS = STATUS.Wait;
     roles: Array<ROLE> = [];
     tpcs: Array<number> = [];
 
@@ -82,13 +82,15 @@ export default class AvalonMachine implements IGameMachine
     taskvote: Array<number> = [];
     result: Array<number> = [ -1, -1, -1, -1, -1 ];
 
-    NotifyCallback : (nums: number[], msg: object) => void;
+    NotifyCallback : (nums: number[], msg: object) => void = (n, m) => {};
 
     constructor(player_count: number) {
         this.pcount = < 5 | 6 | 7 | 8 | 9 | 10 >player_count;
-        this.NotifyCallback = (os, m) => {};
-        this.status = STATUS.Wait;
         this.teamvote = Array(this.pcount).fill(-1);
+    }
+
+    private notify (nums: number[], msg: IGameN) : void {
+        this.NotifyCallback(nums, msg);
     }
     
     private knowledge(num: number) : Array<number> {
@@ -120,17 +122,17 @@ export default class AvalonMachine implements IGameMachine
         this.roles = shuffleCopy(config.role[this.pcount]);
 
         this.roles.map((r, i) => {
-            this.NotifyCallback([i], { type: 'knowledge', role: r, knowledge: this.knowledge(i) });
+            this.notify([i], { type: 'knowledge', role: r, knowledge: this.knowledge(i) });
         });
 
         this.captain = randomInt(this.pcount);
-        this.NotifyCallback([], { type: 'make-team', captain: this.captain,
-                                  round: this.round, try: this.try });
+        this.notify([], { type: 'make-team', captain: this.captain,
+                          round: this.round, try: this.try });
         this.status = STATUS.MakeTeam;
     }
 
     Operate(num: number, operation: object): boolean {
-        let opr = <IOperationObject>operation;
+        let opr = <IOp>operation;
         let res: boolean = true;
         switch (opr.op) {
             case "make-team":
@@ -143,82 +145,88 @@ export default class AvalonMachine implements IGameMachine
                 res = this.taskVote(num, opr.t == 1);
                 break;
             case "assassin":
-                res = this.assassin(0);
+                res = this.assassin(opr.t);
                 break;
         }
         return res;
     }
     
     private makeTeam(array: Array<number>): boolean {
-        // TODO
+        if (array.length != config.task_player_num[this.pcount][this.round])
+            return false;
         this.team = array;
         this.teamvote.fill(-1);
         this.status = STATUS.TeamVote;
-        this.NotifyCallback([], { type: 'team-vote', team: this.team });
+        this.notify([], { type: 'team-vote', team: this.team });
         return true;
     }
 
     private teamVote(num: number, agree: boolean): boolean {
         this.teamvote[num] = agree ? 1 : 0;
-        this.NotifyCallback([], { type: 'team-vote-i', i: num });
+        this.notify([], { type: 'team-vote-i', i: num });
         if (this.teamvote.some(v => v == -1))
             return true;
-        this.NotifyCallback([], { type: 'team-vote-res', res: this.teamVote });
+        this.notify([], { type: 'team-vote-res', teamvote: this.teamvote });
         if (this.teamvote.filter(v => v == 1).length * 2 > this.pcount) {
             this.status = STATUS.TaskVote;
             this.taskvote = Array(this.team.length).fill(-1);
-            this.NotifyCallback([], { type: 'task-vote', team: this.team });
+            this.notify([], { type: 'task-vote', team: this.team });
         } else {
             if (this.try == 4) {
                 this.taskEndWith(false);
             } else {
                 this.try += 1;
+                this.captain = (this.captain + 1) % this.pcount;
                 this.status = STATUS.MakeTeam;
-                this.NotifyCallback([], { type: 'make-team', captain: this.captain,
-                                          round: this.round, try: this.try });
+                this.team = [];
+                this.notify([], { type: 'make-team', captain: this.captain,
+                                  round: this.round, try: this.try });
             }
         }
         return true;
     }
 
     private taskVote(num: number, success: boolean): boolean {
-        this.taskvote[num] = success ? 1 : 0;
-        this.NotifyCallback([], { type: 'task-vote-i', i: num });
+        if (this.team.indexOf(num) == -1) return false;
+        this.taskvote[this.team.indexOf(num)] = success ? 1 : 0;
+        this.notify([], { type: 'task-vote-i', i: num });
         if (this.taskvote.some(v => v == -1))
             return true;
         let failNum = this.taskvote.filter(v => v == 0).length;
         if (failNum == 0 || (this.pcount >= 7 && this.round == 3 && failNum == 1)) {
-            this.NotifyCallback([], { type: 'task-vote-res', res: failNum });
+            this.notify([], { type: 'task-vote-res', res: failNum });
             this.taskEndWith(true);
         } else {
-            this.NotifyCallback([], { type: 'task-vote-res', res: failNum });
+            this.notify([], { type: 'task-vote-res', res: failNum });
             this.taskEndWith(false);
         }
         return true;
     }
 
     private taskEndWith(success: boolean): void {
-        // TODO
+        this.notify([], { type: "task-end", round: this.round, succ: success });
         this.result[this.round] = success ? 1 : 0;
         if (this.result.filter(v => v == 1).length == 3) {
             this.status = STATUS.Assassin;
-            this.NotifyCallback([], { type: 'assassin', });
+            this.notify([], { type: 'assassin', });
         } else if (this.result.filter(v => v == 0).length == 3) {
             this.status = STATUS.End;
-            this.NotifyCallback([], { type: 'end', res: 1, content: this.roles })
+            this.notify([], { type: 'end', res: 1, roles: this.roles })
         } else {
             this.round += 1;
-            this.try = 1;
+            this.try = 0;
+            this.captain = (this.captain + 1) % this.pcount;
             this.status = STATUS.MakeTeam;
-            this.NotifyCallback([], { type: 'make-team', player: this.captain,
-                                      round: this.round, try: this.try });
+            this.team = [];
+            this.notify([], { type: 'make-team', captain: this.captain,
+                              round: this.round, try: this.try });
         }
     }
 
     private assassin(target: number): boolean {
-        let res = this.roles[target] == ROLE.Merlin ? 0 : 1;
+        let res : 0 | 1 = this.roles[target] === ROLE.Merlin ? 0 : 1;
         this.status = STATUS.End;
-        this.NotifyCallback([], { type: 'end', res: res, roles: this.roles });
+        this.notify([], { type: 'end', res: res, roles: this.roles });
         return true;
     }
 

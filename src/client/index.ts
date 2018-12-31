@@ -13,7 +13,7 @@ let app = new Vue({
     template: `
     <div>
         <join-component v-if="!room" @ev="event" :name="user ? user.name : ''" />
-        <game-component v-if="room" @ev="event" :roomn="roomn" :op="op" :msg="msg" :stat="room" />
+        <game-component v-if="room" @ev="event" :roomn="roomn" :gamen="gamen" :msg="msg" :stat="room" />
     </div>
     `,
     data: function() { return {
@@ -21,7 +21,7 @@ let app = new Vue({
         room: <IRoomStatus | undefined>undefined,
 
         roomn: {},
-        op: {},
+        gamen: {},
         msg: {},
     } },
     methods: {
@@ -46,7 +46,7 @@ socket.on('reconnect', function () {
 });
 
 socket.on('status', function (data: IStatus) {
-    // console.log(data);
+    console.log(JSON.stringify(data));
     app.user = data.user;
     app.room = data.room;
     if (data.user) localStorage.setItem('user-id', data.user.token);
@@ -71,8 +71,9 @@ socket.on('room', function (data: IRoomN) {
     app.roomn = data;
 });
 
-socket.on('update', function (data: object) {
-    app.op = data;
+socket.on('game', function (data: object) {
+    console.log(JSON.stringify(data));
+    app.gamen = data;
 });
 
 socket.on('disconnect', function () {

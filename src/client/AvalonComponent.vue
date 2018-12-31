@@ -1,45 +1,73 @@
 <template>
     <div>
-        <p>Room id : {{ roomid }}</p>
-        <div class="seat" v-for="(item, idx) in seats" :key="item.id" style="border: 1px solid #DDD; padding: 0.5rem; ">
+        <p>Room id: {{ roomid }}</p>
+        <div style="display: flex;">
+        <div class="seat" v-for="(item, idx) in seats" :key="item.id">
             <div>Player {{ idx + 1 }}: {{ item.name }}</div>
-            <div class="prepare" v-if="prepare[idx]">[Prepared]</div>
-            <div class="captain" v-if="captain === idx">[Captain]</div>
-            <div class="inteam" v-if="team.includes(idx)">[In team]</div>
-            <div class="voted" v-if="false">[Voted]</div>
-            <div class="agree" v-if="false">[Agree]</div>
-            <div class="disagree" v-if="false">[Disagree]</div>
-            <input type="checkbox" v-if="status == 1 && captain == idx"
+            <div class="prepare" v-if="status === 0 && prepare[idx]">[Prepared]</div>
+            <button v-if="status === 0 && my_seat === idx" @click="prep">Prepare</button>
+            <div class="captain" v-if="status !== 0 && captain === idx">[Captain]</div>
+            <div class="inteam" v-if="status !== 0 && team.includes(idx)">[In team]</div>
+            <div class="vote_status" v-if="(status === 3 || d_task_res) && team.includes(idx)">
+                <div class="voted" v-if="taskvote[idx] === -2">?</div>
+            </div>
+            <div class="vote_status" v-if="status === 2 || d_team_res">
+                <div class="voted" v-if="teamvote[idx] === -2">?</div>
+                <div class="agree" v-if="teamvote[idx] === 1"></div>
+                <div class="disagree" v-if="teamvote[idx] === 0"></div>
+            </div>
+            <input type="checkbox" v-if="(status === 1 && captain === my_seat)
+                                      || (status === 4 && role === 3)"
                 v-model="selections" :value="idx">
             <input type="radio" v-if="false" name="player_select" v-model="selection" :value="idx">
-            <button v-if="status == 0" @click="move(idx)">{{ _users[userid].seat == idx ? "Leave" : "Sit" }}</button>
+            <button v-if="status === 0" @click="move(idx)">{{ _users[userid].seat == idx ? "Leave" : "Sit" }}</button>
         </div>
-        <button v-if="status == 0 && _users[userid].seat != -1" @click="prep">Prepare</button>
+        </div>
+        
+        <!-- debug -->
+        <!-- <p>{{ seats }}</p> -->
+        <p>{{ my_role_name }}, {{ knowledge }}</p>
 
-        <div>{{ op }}</div>
-        <div class="record">
-            <div v-for="(item, idx) in result" :key="item.id">
+        <div class="record" style="display: flex;">
+            <div v-for="(item, idx) in result" :key="item.id" style="border: 1px solid #DDD; padding: 0.5rem;">
                 Round {{ idx + 1 }}: {{ task_player_num[idx] }} : {{ ["-", "fail", "success"][item + 1] }}
+                <div v-if="round === idx">o</div>
             </div>
-            <div v-for="tn in [ 1, 2, 3, 4, 5 ]" :key="tn.id">
-                {{ tn }}
+            <div v-for="tn in [ 0, 1, 2, 3, 4 ]" :key="tn.id" style="border: 1px solid #DDD; padding: 0.5rem;">
+                {{ tn + 1 }}
+                <div v-if="$data.try === tn">o</div>
             </div>
         </div>
 
-        <div class="panel" v-if="[ 2, 3 ].includes(status)">
+        <p>{{ prompt }}</p>
+
+        <button v-if="d_team_res || d_task_res" @click="d_team_res = false; d_task_res = false">OK</button>
+
+        <div class="panel" v-if="status === 2">
+            Team vote
             <input type="radio" v-model="selection" :value="1">
             <input type="radio" v-model="selection" :value="0">
-            <button @click="alert(1)">确定</button>
+            <button @click="submit">确定</button>
         </div>
 
-        <div class="panel" v-if="captain == myseat && status == 1">
-            <button @click="alert(1)">确定</button>
+        <div class="panel" v-if="status === 3 && team.indexOf(my_seat) !== -1">
+            Task vote
+            <input type="radio" v-model="selection" :value="1">
+            <input type="radio" v-model="selection" :value="0">
+            <button @click="submit">确定</button>
+        </div>
+
+        <div class="panel" v-if="(captain === my_seat && status === 1)
+                              || (role === 3 && status === 4)">
+            <button @click="submitMulti">确定</button>
         </div>
 
         <div>
-            <!-- <div v-for="m in messages" :key="m.id">
-                Player {{ m.order + 1 }} : {{ m.text }}
-            </div> -->
+            <div v-for="m in messages" :key="m.id">
+                {{ m.name }} : {{ m.text }}
+            </div>
+            <input v-model="message">
+            <button @click="sendMsg">>></button>
         </div>
     </div>
 </template>
@@ -47,7 +75,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import { IUserInfo, IRoomN, IRoomStatus, IRoomOp } from '../common/RoomInterface';
-import { IOperation, IGameStatus } from '../common/AvalonInterface';
+import { IGameStatus, IGameN, IOp } from '../common/AvalonInterface';
 
 const Util = {
     range: function (n: number) {
@@ -55,6 +83,11 @@ const Util = {
         for (var i = 0; i < n; i++) arr.push(i);
         return arr;
     },
+    filled: function (n: number, v: any) {
+        var arr = [];
+        for (var i = 0; i < n; i++) arr.push(v);
+        return arr;
+    }
 };
 
 enum ROLE {
@@ -82,6 +115,17 @@ enum STATUS {
 }
 
 const config = {
+    role_name: [
+        "梅林",
+        "派西维尔",
+        "亚瑟的忠臣",
+        "刺客",
+        "莫甘娜",
+        "莫德雷德",
+        "奥伯伦",
+        "莫德雷德的爪牙",
+        // "兰斯洛特AB",
+    ],
     role: <{ [index:number]: Number[] }>{
         5:  [0, 1, 2, 3, 4],
         6:  [0, 1, 2, 2, 3, 4],
@@ -101,28 +145,32 @@ const config = {
 }
 
 export default Vue.extend({
-    props: [ "op", "msg", "stat", "roomn" ],
+    props: [ "gamen", "msg", "stat", "roomn" ],
 
     data: function() { return {
         userid: "",
         roomid: "",
+        pcount: 5,
         seats: <IUserInfo[]> [],
         prepare: <boolean[]> [],
-        pcount: 5,
         round: -1,
         try: -1,
-        myseat: -1,
         role: ROLE.Unknown,
+        roles: <ROLE[]> [],
         knowledge: <number[]> [],
         selection: -1,
         selections: <number[]> [],
-        status: STATUS.MakeTeam,
+        status: STATUS.Wait,
         captain: 0,
         team: <number[]> [],
         teamvote: <number[]> [],
         taskvote: <number[]> [],
         result: [ -1, -1, -1, -1, -1 ],
+        message: "",
         messages: <any[]> [],
+
+        d_team_res: false,
+        d_task_res: false,
 
         _users: <{ [key:string]: { info: IUserInfo, seat: number } }> {},
     }; },
@@ -137,56 +185,79 @@ export default Vue.extend({
         },
 
         roomn: function (obj: IRoomN) {
-            switch (obj.type) {
-                case "move-i":
-                    let u = this._users[obj.userid];
-                    if (u.seat !== -1)
-                        this.seats[u.seat] = <IUserInfo>{ name: '----' };
-                    if (obj.t !== -1)
-                        this.seats[obj.t] = u.info;
-                    u.seat = obj.t;
-                    break;
-                case "disconn-i": case "reconn-i":
-                    break;
-                case "exit-i":
-                    delete this._users[obj.userid];
-                    break;
-                case "prepare":
-                    this.prepare.splice(obj.t, 1, true);
-                    break;
+            if (obj.type === "prepare") {
+                this.prepare.splice(obj.t, 1, true);
+            } else if (obj.type === "join-i") {
+                this._users[obj.user.userid] = { seat: -1, info: obj.user };
+            } else if (obj.type === "message") {
+                this.messages.push({ name: this._users[obj.userid].info.name, text: obj.c });
+            } else {
+                let u = this._users[obj.userid];
+                switch (obj.type) {
+                    case "move-i":
+                        if (u.seat !== -1) {
+                            this.seats.splice(u.seat, 1, <IUserInfo>{ name: '----' });
+                            this.prepare.splice(u.seat, 1, false);
+                        }
+                        if (obj.t !== -1)
+                            this.seats.splice(obj.t, 1, u.info);
+                        u.seat = obj.t;
+                        break;
+                    case "disconn-i":
+                        if (u.seat !== -1) {
+                            this.prepare.splice(u.seat, 1, false);
+                        }
+                        break;
+                    case "reconn-i":
+                        break;
+                    case "exit-i":
+                        delete this._users[obj.userid];
+                        break;
+                }
             }
         },
 
-        op: function (obj: IOperation): void {
-            switch (obj.op) {
+        gamen: function (obj: IGameN): void {
+            switch (obj.type) {
+                case "knowledge":
+                    this.knowledge = obj.knowledge;
+                    this.role = obj.role;
+                    break;
                 case "make-team":
                     this.status = STATUS.MakeTeam;
-                    this.captain = obj.t;
+                    this.captain = obj.captain;
+                    this.round = obj.round;
+                    this.try = obj.try;
                     this.team = [];
                     this.selections = [];
                     break;
                 case "team-vote":
                     this.status = STATUS.TeamVote;
-                    this.team = obj.ts;
+                    this.team = obj.team;
+                    this.teamvote = Util.filled(this.pcount, -1);
                     this.selection = -1;
                     break;
                 case "team-vote-i":
-                    this.teamvote.splice(obj.t, 1, -2);
+                    this.teamvote.splice(obj.i, 1, -2);
                     break;
-                case "team-vote-r":
-                    // TODO
+                case "team-vote-res":
+                    this.teamvote = obj.teamvote;
+                    this.d_team_res = true;
                     break;
                 case "task-vote":
                     this.status = STATUS.TaskVote;
-                    this.taskvote = obj.ts;
+                    this.team = obj.team;
                     this.selection = -1;
-                    // TODO
+                    this.taskvote = Util.filled(this.pcount, -1);
                     break;
                 case "task-vote-i":
-                    (this.taskvote as Array<Number>).splice(obj.t, 1, -2);
+                    this.taskvote.splice(obj.i, 1, -2);
                     break;
-                case "task-vote-r":
+                case "task-vote-res":
                     // TODO
+                    break;
+                case "task-end":
+                    this.result.splice(obj.round, 1, obj.succ ? 1 : 0);
                     break;
                 case "assassin":
                     this.status = STATUS.Assassin;
@@ -229,36 +300,82 @@ export default Vue.extend({
                 this.try = game.try;
                 this.captain = game.captain;
                 this.team = game.team;
+                this.status = game.status;
+                this.teamvote = Util.filled(this.pcount, -1);
+                this.taskvote = Util.filled(this.pcount, -1);
             }
         },
 
         move: function (t: number) {
-            if (t === this._users[this.userid].seat) t = -1;
+            if (t === this.my_seat) t = -1;
             this.$emit("ev", { type: "room", data: <IRoomOp>{ op: "move", t: t } });
         },
 
         prep: function () {
-            if (this._users[this.userid].seat === -1) return;
+            if (this.my_seat === -1) return;
             this.$emit("ev", { type: "room", data: <IRoomOp>{ op: "prepare" }});
         },
 
+        sendMsg: function () {
+            this.$emit('ev', { type: 'room', data: { op: 'message', c: this.message }});
+        },
+
         submit: function () {
-            // TODO
-            var op = "";
-            this.$emit("ev", { type: "op", data: <IOperation>{ op: op, t: this.selection } });
+            var data : IOp;
+            if (this.status === STATUS.TeamVote) {
+                data = { op: "team-vote", t: this.selection };
+            } else if (this.status === STATUS.TaskVote && this.team.indexOf(this.my_seat) !== -1) {
+                data = { op: "task-vote", t: this.selection };
+            } else return;
+            this.$emit("ev", { type: "operate", data: data });
         },
 
         submitMulti: function () {
             // TODO
-            var op = "";
-            this.$emit("ev", { type: "op", data: <IOperation>{ op: op, ts: this.selections } });
+            var data : IOp;
+            if (this.status === STATUS.MakeTeam && this.captain === this.my_seat) {
+                data = { op: "make-team", ts: this.selections };
+            } else if (this.status === STATUS.Assassin && this.role === ROLE.Assassin) {
+                data = { op: "assassin", t: this.selections[0] };
+            } else return;
+            this.$emit("ev", { type: "operate", data: data });
+        },
+
+        role_to_name: function (r: ROLE) : string {
+            if (r < 0) return "-";
+            else return config.role_name[r];
         },
     },
 
     computed: {
         task_player_num: function(): Number[] {
             return config.task_player_num[this.pcount];
-        }
+        },
+
+        my_seat: function () : number {
+            return this._users[this.userid].seat;
+        },
+
+        prompt: function () : string {
+            switch (this.status) {
+                case STATUS.Wait:
+                    return "等待开始...";
+                case STATUS.MakeTeam:
+                    return "等待组队";
+                case STATUS.TeamVote:
+                    return "投票";
+                case STATUS.TaskVote:
+                    return "执行任务";
+                case STATUS.Assassin:
+                    return "刺客选择目标";
+                default:
+                    return "--";
+            }
+        },
+
+        my_role_name: function () : string {
+            return this.role_to_name(this.role);
+        },
     },
 });
 
@@ -267,5 +384,41 @@ export default Vue.extend({
 <style scoped>
 p {
     color: violet;
+}
+
+.seat {
+    position: relative;
+    width: 10rem;
+    height: 6rem;
+    border: 1px solid gray;
+    padding: 0.5rem;
+}
+
+.vote_status {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    border: 1px solid gray;
+    background: gray;
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.vote_status > * {
+    margin: auto;
+    color: white;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+}
+
+.vote_status > .agree {
+    background: white;
+}
+
+.vote_status > .disagree {
+    background: black;
 }
 </style>

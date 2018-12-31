@@ -40,7 +40,8 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                loader: "css-loader" },
+                use: [ "vue-style-loader", "css-loader" ]
+            },
             {
                 test: /\.json$/,
                 loader: "json-loader"

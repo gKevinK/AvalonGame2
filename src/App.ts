@@ -105,7 +105,7 @@ io.on('connection', function (socket) {
         if (r) r.RoomOpr(<string>userid, data);
     });
 
-    socket.on('operate', function (data: string) {
+    socket.on('operate', function (data: object) {
         let r = getRoom();
         if (r) r.Operate(<string>userid, data);
     });

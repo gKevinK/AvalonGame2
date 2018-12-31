@@ -45,11 +45,14 @@ class Seat
     }
 
     offline (): void {
+        this.prepared = false;
         this.NotifyCallback = undefined;
     }
 
     leave (): void {
         this.userinfo = undefined;
+        this.prepared = false;
+        // this.notify('exit', {});
         this.NotifyCallback = undefined;
     }
 }
@@ -88,14 +91,15 @@ export class Room
             }
         } else {
             if (ids.length === 0) {
-                ids = Util.range(this.num).concat([ -1 ]);
+                this._user.forEach(u => u.cb && u.cb(type, obj));
+            } else {
+                ids.forEach(i => this.notify(i, type, obj));
             }
-            ids.forEach(i => this.notify(i, type, obj));
         }
     }
 
     join (n: number, userinfo: IUserInfo, callback: NotifyCb) : void {
-        this.seats.forEach(s => s.notify('room', { type: 'join-i', order: n, name: userinfo.name }));
+        this.seats.forEach(s => s.notify('room', { type: 'join-i', user: userinfo }));
         this._user.set(userinfo.userid, { info: userinfo, seat: n, cb: callback });
         if (n >= 0) {
             let seat = this.seats[n];
@@ -109,15 +113,21 @@ export class Room
 
     RoomOpr (userid: string, op: IRoomOp) : boolean {
         // TODO
-        let u = this._user.get(userid);
-        if (!u) return false;
+        let user = this._user.get(userid);
+        if (!user) return false;
         switch (op.op) {
             case "move":
                 return this.move(userid, op.t);
+            case "message":
+                this.Message(userid, op.c);
+                break;
             case "prepare":
-                if (u.seat === -1) return false;
-                this.seats[u.seat].prepared = true;
-                this._user.forEach(u => u.cb && u.cb('room', <IRoomN>{ type: 'prepare', t: u.seat }));
+                if (user.seat === -1) return false;
+                this.seats[user.seat].prepared = true;
+                const data : IRoomN = { type: 'prepare', t: user.seat };
+                this._user.forEach(u => u.cb && u.cb('room', data));
+                if (this.seats.every(s => s.prepared))
+                    this.start();
                 break;
         }
         return false;
@@ -137,16 +147,16 @@ export class Room
         return true;
     }
 
-    Operate (userid: string, op: string) : boolean {
+    Operate (userid: string, op: object) : boolean {
         let d = this._user.get(userid);
         if (!d || d.seat === -1 || !this.machine) return false;
-        return this.machine.Operate(d.seat, JSON.parse(op));
+        return this.machine.Operate(d.seat, op);
     }
 
     Message (userid: string, msg: string) : void {
         let u = this._user.get(userid);
         if (!u) return;
-        this.notify([], 'message', { userid: userid, seat: u.seat, text: msg });
+        this.notify([], 'room', <IRoomN>{ type: 'message', userid: userid, c: msg });
     }
 
     Disconnect (userid: string) : void {
@@ -177,7 +187,7 @@ export class Room
             _users: [...this._user.values()].map(v => { return { info: v.info, seat: v.seat }; }),
             prepare: this.seats.map(s => s.prepared),
             num: this.num,
-            status: 1,
+            status: 0,
             
             game: this.machine ? this.machine.GetStatus(d.seat) : undefined,
         };
@@ -209,12 +219,13 @@ export default class RoomManager
     JoinNew (conf: IRoomConfig, order: number, userinfo: IUserInfo, callback: NotifyCb) : boolean {
         let id = this.getId();
         this.rooms.set(id, new Room(id, conf));
+        console.log('+ Room ' + id + ' created.');
         let r = this.Join(id, order, userinfo, callback);
         if (r === false) {
             this.rooms.delete(id);
+            console.log('+ Room ' + id + ' destroyed.');
             return false;
         }
-        console.log('+ Room ' + id + ' created.');
         return true;
     }
 
