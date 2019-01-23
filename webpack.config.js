@@ -11,7 +11,6 @@ module.exports = {
         path: path.resolve(__dirname, "dist/static"),
     },
 
-    // Enable sourcemaps for debugging webpack's output.
     devtool: "source-map",
     // target: "node",
     resolve: {

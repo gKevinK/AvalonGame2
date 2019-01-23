@@ -1,9 +1,10 @@
 <template>
-    <div>
-        <p>Room id: {{ roomid }}</p>
+    <div class="root">
+        <div># {{ roomid }}</div>
         <div style="display: flex;">
         <div class="seat" v-for="(item, idx) in seats" :key="item.id">
-            <div>Player {{ idx + 1 }}: {{ item.name }}</div>
+            <div class="number">{{ idx + 1 }}</div>
+            <div class="name">{{ item.name }}</div>
             <div class="prepare" v-if="status === 0 && prepare[idx]">[Prepared]</div>
             <button v-if="status === 0 && my_seat === idx" @click="prep">Prepare</button>
             <div class="captain" v-if="status !== 0 && captain === idx">[Captain]</div>
@@ -29,11 +30,13 @@
         <p>{{ my_role_name }}, {{ knowledge }}</p>
 
         <div class="record" style="display: flex;">
-            <div v-for="(item, idx) in result" :key="item.id" style="border: 1px solid #DDD; padding: 0.5rem;">
-                Round {{ idx + 1 }}: {{ task_player_num[idx] }} : {{ ["-", "fail", "success"][item + 1] }}
+            <div v-for="(item, idx) in result" :key="item.id" class="panel_round">
+                <div style="font-size: 60%; ">Round {{ idx + 1 }}</div>
+                <div>{{ task_player_num[idx] }}</div>
+                <div>{{ ["-", "fail", "success"][item + 1] }}</div>
                 <div v-if="round === idx">o</div>
             </div>
-            <div v-for="tn in [ 0, 1, 2, 3, 4 ]" :key="tn.id" style="border: 1px solid #DDD; padding: 0.5rem;">
+            <div v-for="tn in [ 0, 1, 2, 3, 4 ]" :key="tn.id" class="panel_try">
                 {{ tn + 1 }}
                 <div v-if="$data.try === tn">o</div>
             </div>
@@ -382,16 +385,32 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-p {
-    color: violet;
+.root {
+    font-size: 0.8rem;
 }
 
 .seat {
     position: relative;
-    width: 10rem;
-    height: 6rem;
+    width: 6em;
+    height: 6em;
     border: 1px solid gray;
-    padding: 0.5rem;
+    padding: 0.5em;
+}
+
+.number {
+    position: absolute;
+    left: 0;
+    top:  0;
+    width:  1.4em;
+    height: 1.4em;
+    border-bottom-right-radius: 50%;
+    color: white;
+    background: gray;
+    text-align: center;
+}
+
+.name {
+    margin-top: 0.5em;
 }
 
 .vote_status {
@@ -401,8 +420,8 @@ p {
     border-radius: 50%;
     border: 1px solid gray;
     background: gray;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 1.5em;
+    height: 1.5em;
 }
 
 .vote_status > * {
@@ -420,5 +439,20 @@ p {
 
 .vote_status > .disagree {
     background: black;
+}
+
+.panel_round {
+    border: 1px solid gray;
+    border-radius: 50%;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+.panel_try {
+    border: 1px solid gray;
+    border-radius: 50%;
+    width:  2em;
+    height: 2em;
+    text-align: center;
 }
 </style>
